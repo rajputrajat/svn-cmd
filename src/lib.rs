@@ -1,16 +1,37 @@
 //! This lib wraps svn command line tool on your system
 #![deny(missing_docs)]
 #![deny(unsafe_code)]
-use std::result::Result;
+use log::{info, trace};
+use std::{io, result::Result};
 use thiserror::Error;
 
 /// Accessor to svn command functionality
 pub struct SvnCmd {}
 
+/// Credentials
+pub struct Credentials {
+    username: String,
+    password: String,
+}
+
+/// global options to use svn tool
+pub struct LoginOptions {
+    credentials: Credentials,
+    cache_auth_tokens: bool,
+    non_interactive: bool,
+    trust_server_cert: bool, // this is valid only when non_interactive is `true`
+    config_options: Option<String>,
+}
+
 /// Builder to create SvnCmd
 pub struct SvnCmdBuilder {}
 
 impl SvnCmd {
+    /// create SvnCmd struct
+    pub fn new() -> Result<SvnCmd, SvnError> {
+        Ok(SvnCmd {})
+    }
+
     /// SVN ADD command to add new files to stage for commit operation
     /// `svn add PATH`
     pub fn add(&self) -> Result<(), SvnError> {
@@ -96,4 +117,7 @@ pub enum SvnError {
     /// no connection
     #[error("no connectivity")]
     Disconnection,
+    /// Svn utility isn't installed
+    #[error("command line svn tool isn't installed or not added in PATH env")]
+    MissingSvnCli(#[from] io::Error),
 }
