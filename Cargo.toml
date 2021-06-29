@@ -4,6 +4,7 @@ version = "0.1.0"
 authors = ["Rajat Rajput <rajputrajat@gmail.com>"]
 description = "this is a wrapper to svn command-line utility"
 repository = "https://github.com/rajputrajat/svn-cmd.git"
+license = "MIT"
 edition = "2018"
 
 [dependencies]
