@@ -23,6 +23,19 @@ pub struct LoginOptions {
     config_options: Option<String>,
 }
 
+/// file or dir
+pub enum PathType {
+    File,
+    Dir,
+}
+
+/// revision
+#[derive(Debug, PartialEq, Eq)]
+pub enum RevisionType {
+    Head,
+    Revision(u64),
+}
+
 /// Builder to create SvnCmd
 pub struct SvnCmdBuilder {}
 
@@ -30,6 +43,26 @@ impl SvnCmd {
     /// create SvnCmd struct
     pub fn new() -> Result<SvnCmd, SvnError> {
         Ok(SvnCmd {})
+    }
+
+    /// get svn version installed
+    pub fn version() -> Result<String, SvnError> {
+        Ok("".to_owned())
+    }
+
+    /// get list of files
+    pub fn list() -> Result<(), SvnError> {
+        Ok(())
+    }
+
+    /// get diff
+    pub fn diff() -> Result<(), SvnError> {
+        Ok(())
+    }
+
+    /// read file content
+    pub fn cat() -> Result<String, SvnError> {
+        Ok(())
     }
 
     /// SVN ADD command to add new files to stage for commit operation
@@ -100,7 +133,19 @@ impl SvnCmd {
 
     /// SVN MERGE command: merge change-sets from mentioned repo
     /// `svn merge [--dry-run] --force From_URL@revN To_URL@revM PATH`
-    pub fn merge() -> Result<(), SvnError> {
+    pub fn merge(&self) -> Result<(), SvnError> {
+        Ok(())
+    }
+
+    /// SVN IMPORT command: import dir/files from local filesystem
+    /// `svn import -m "<commit message>"`
+    pub fn import(&self) -> Result<(), SvnError> {
+        Ok(())
+    }
+
+    /// SVN MKDIR command: create a dir in svn repo
+    /// `svn mkdir -m "<commit message>"`
+    pub fn mkdir(&self) -> Result<(), SvnError> {
         Ok(())
     }
 }
