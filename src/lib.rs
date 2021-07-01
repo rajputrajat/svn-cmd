@@ -1,23 +1,35 @@
 //! This lib wraps svn command line tool on your system
 #![deny(missing_docs)]
 #![deny(unsafe_code)]
-use log::{info, trace};
+use log::trace;
 use std::result::Result;
 
+mod cmd_wrapper;
+mod errors;
 mod types;
+
+use cmd_wrapper::*;
+use errors::*;
 use types::*;
 
 /// Accessor to svn command functionality
-pub struct SvnCmd {}
+pub struct SvnCmd {
+    options: LoginOptions,
+}
 
 /// Builder to create SvnCmd
 pub struct SvnCmdBuilder {}
 
 impl SvnCmd {
     /// create SvnCmd struct
-    pub fn new() -> Result<SvnCmd, SvnError> {
+    pub fn new(creds: Credentials, more: Option<Optionals>) -> Result<SvnCmd, SvnError> {
         trace!("");
-        Ok(SvnCmd {})
+        Ok(SvnCmd {
+            options: LoginOptions {
+                credentials: creds,
+                more: more.unwrap_or_default(),
+            },
+        })
     }
 
     /// get svn version installed
