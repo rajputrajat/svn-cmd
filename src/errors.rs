@@ -25,4 +25,8 @@ pub enum SvnError {
     /// invalid credentials
     #[error("invalid credentials supplied")]
     InvalidCredentials,
+
+    /// not working copy
+    #[error("current dir is not working dir")]
+    NotWorkingDir,
 }

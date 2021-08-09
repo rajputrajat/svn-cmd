@@ -8,15 +8,7 @@ pub(crate) struct SvnWrapper {
     cmd: String,
 }
 
-impl SvnWrapper {
-    fn common_cmd_runner(&self, args: &[&str]) -> Result<String, SvnError> {
-        match Command::new(&self.cmd).args(args).output() {
-            Ok(o) => String::from_utf8(o.stdout).map_err(|e| SvnError::FromUtf8Error { src: e }),
-            Err(e) => Err(SvnError::MissingSvnCli { src: e }),
-        }
-    }
-}
-
+// associated functions
 impl SvnWrapper {
     pub(crate) fn new() -> Self {
         Self {
@@ -29,7 +21,33 @@ impl SvnWrapper {
     }
 }
 
+// private methods
+impl SvnWrapper {
+    fn common_cmd_runner(&self, args: &[&str]) -> Result<String, SvnError> {
+        match Command::new(&self.cmd).args(args).output() {
+            Ok(o) => {
+                if o.stderr.is_empty() {
+                    String::from_utf8(o.stdout).map_err(|e| SvnError::FromUtf8Error { src: e })
+                } else {
+                }
+            }
+            Err(e) => Err(SvnError::MissingSvnCli { src: e }),
+        }
+    }
+
+    fn which_err(err: &str) -> SvnError {
+        match err {}
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn simple_run() {
+        let wrap = SvnWrapper::new();
+        let out = dbg!(wrap.common_cmd_runner(&["info"]));
+        assert_eq!(out.unwrap(), " ".to_owned());
+    }
 }
