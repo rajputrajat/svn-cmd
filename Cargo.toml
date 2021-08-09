@@ -8,8 +8,8 @@ license = "MIT"
 edition = "2018"
 
 [dependencies]
-log = "0.4.14"
-thiserror = "1.0.25"
+log = "0.4"
+thiserror = "1"
 
 [dev-dependencies]
-env_logger = "0.8.4"
+env_logger = "0.8"
