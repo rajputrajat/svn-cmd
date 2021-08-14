@@ -29,6 +29,10 @@ impl SvnWrapper {
                 if o.stderr.is_empty() {
                     String::from_utf8(o.stdout).map_err(|e| SvnError::FromUtf8Error { src: e })
                 } else {
+                    Err(SvnError::Other(match String::from_utf8(o.stderr) {
+                        Ok(o) => o,
+                        Err(e) => e.to_string(),
+                    }))
                 }
             }
             Err(e) => Err(SvnError::MissingSvnCli { src: e }),

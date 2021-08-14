@@ -29,4 +29,8 @@ pub enum SvnError {
     /// not working copy
     #[error("current dir is not working dir")]
     NotWorkingDir,
+
+    /// other error
+    #[error("other error")]
+    Other(String),
 }
