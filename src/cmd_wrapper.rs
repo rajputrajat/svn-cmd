@@ -48,10 +48,10 @@ impl SvnWrapper {
 mod tests {
     use super::*;
 
-    #[test]
-    fn simple_run() {
+    #[async_std::test]
+    async fn simple_run() {
         let wrap = SvnWrapper::new();
-        let out = dbg!(wrap.common_cmd_runner(&["info"]));
+        let out = dbg!(wrap.common_cmd_runner(&["info"]).await);
         assert_eq!(out.unwrap(), " ".to_owned());
     }
 }
