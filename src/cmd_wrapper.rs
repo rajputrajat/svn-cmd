@@ -38,10 +38,6 @@ impl SvnWrapper {
             Err(e) => Err(SvnError::MissingSvnCli { src: e }),
         }
     }
-
-    fn which_err(err: &str) -> SvnError {
-        match err {}
-    }
 }
 
 #[cfg(test)]
@@ -49,6 +45,7 @@ mod tests {
     use super::*;
 
     #[async_std::test]
+    #[should_panic]
     async fn simple_run() {
         let wrap = SvnWrapper::new();
         let out = dbg!(wrap.common_cmd_runner(&["info"]).await);
