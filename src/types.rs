@@ -1,6 +1,7 @@
 //! this implements svn types
 
 use async_std::path::PathBuf;
+use serde::Deserialize;
 use url::Url;
 
 /// Credentials
@@ -48,7 +49,10 @@ pub enum RevisionType {
 }
 
 /// Return value of SvnCmd . info()
-pub struct SvnInfo {}
+#[derive(Debug, Deserialize)]
+pub struct SvnInfo {
+    //entry:
+}
 
 /// Return value of SvnCmd . status()
 pub struct SvnStatus {}
