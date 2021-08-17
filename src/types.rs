@@ -1,5 +1,8 @@
 //! this implements svn types
 
+use async_std::path::PathBuf;
+use url::Url;
+
 /// Credentials
 pub struct Credentials {
     pub username: String,
@@ -49,3 +52,8 @@ pub struct SvnInfo {}
 
 /// Return value of SvnCmd . status()
 pub struct SvnStatus {}
+
+pub enum Target {
+    Local(PathBuf),
+    Remote(Url),
+}
