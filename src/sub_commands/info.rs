@@ -1,9 +1,11 @@
 use crate::types::PathType;
+use chrono::prelude::*;
 use serde::{
     de::{self, Deserializer},
     Deserialize,
 };
 use url::Url;
+use uuid::Uuid;
 
 #[derive(Debug, Deserialize)]
 struct InfoEntry {
@@ -37,17 +39,36 @@ where
     Url::parse(s).map_err(de::Error::custom)
 }
 
+fn to_uuid<'de, D>(deserializer: D) -> Result<Uuid, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let s: &str = Deserialize::deserialize(deserializer)?;
+    Uuid::parse_str(s).map_err(de::Error::custom)
+}
+
+fn to_chrono<'de, D>(deserializer: D) -> Result<DateTime<FixedOffset>, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let s: &str = Deserialize::deserialize(deserializer)?;
+    DateTime::parse_from_rfc3339(s).map_err(de::Error::custom)
+}
+
 #[derive(Debug, Deserialize)]
 struct EntryRepository {
-    root: String,
-    uuid: String,
+    #[serde(deserialize_with = "to_url")]
+    root: Url,
+    #[serde(deserialize_with = "to_uuid")]
+    uuid: Uuid,
 }
 
 #[derive(Debug, Deserialize)]
 struct EntryCommit {
     revision: u32,
     author: String,
-    date: String,
+    #[serde(deserialize_with = "to_chrono")]
+    date: DateTime<FixedOffset>,
 }
 
 /// Return value of SvnCmd . info()
