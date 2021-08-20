@@ -1,5 +1,8 @@
 use crate::types::PathType;
-use serde::{Deserialize, Deserializer};
+use serde::{
+    de::{self, Deserializer},
+    Deserialize,
+};
 
 #[derive(Debug, Deserialize)]
 struct InfoEntry {
@@ -14,6 +17,14 @@ fn into_pathtype<'de, D>(deserializer: D) -> Result<PathType, D::Error>
 where
     D: Deserializer<'de>,
 {
+    let s: &str = Deserialize::deserialize(deserializer)?;
+    if s == "dir" {
+        Ok(PathType::Dir)
+    } else if s == "file" {
+        Ok(PathType::File)
+    } else {
+        Err(de::Error::custom("invalid file type"))
+    }
 }
 
 #[derive(Debug, Deserialize)]
