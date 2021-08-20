@@ -13,6 +13,7 @@ struct InfoEntry {
     kind: PathType,
     #[serde(deserialize_with = "to_url")]
     url: Url,
+    #[serde(rename(deserialize = "relative-url"))]
     relative_url: String,
     repository: EntryRepository,
 }
