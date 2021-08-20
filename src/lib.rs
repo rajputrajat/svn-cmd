@@ -6,6 +6,7 @@ use std::result::Result;
 
 mod cmd_wrapper;
 mod errors;
+mod sub_commands;
 mod types;
 
 use cmd_wrapper::*;

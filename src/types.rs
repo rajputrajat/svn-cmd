@@ -1,7 +1,6 @@
 //! this implements svn types
 
 use async_std::path::PathBuf;
-use serde::Deserialize;
 use url::Url;
 
 /// Credentials
@@ -36,6 +35,7 @@ pub struct LoginOptions {
 }
 
 /// file or dir
+#[derive(Debug)]
 pub enum PathType {
     File,
     Dir,
@@ -46,12 +46,6 @@ pub enum PathType {
 pub enum RevisionType {
     Head,
     Revision(u64),
-}
-
-/// Return value of SvnCmd . info()
-#[derive(Debug, Deserialize)]
-pub struct SvnInfo {
-    //entry:
 }
 
 /// Return value of SvnCmd . status()
