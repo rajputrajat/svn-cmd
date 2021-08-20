@@ -78,5 +78,40 @@ pub(crate) struct SvnInfo {
 }
 
 impl SvnInfo {
-    pub(crate) fn parse<T: Into<String>>(xml: T) {}
+    pub(crate) fn parse<T: Into<String>>(xml: T) -> Self {
+        serde_xml_rs::from_str(&xml.into()).unwrap()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn sample_xml_data() {
+        const XML: &str = r##"
+<?xml version="1.0" encoding="UTF-8"?>
+<info>
+    <entry path="." revision="324270" kind="dir">
+        <url>https://svn.ali.global/GDK_games/GDK_games/BLS/HHR/BuffaloDeluxe/trunk/source</url>
+        <relative-url>^/GDK_games/BLS/HHR/BuffaloDeluxe/trunk/source</relative-url>
+        <repository>
+            <root>https://svn.ali.global/GDK_games</root>
+            <uuid>e0c53376-34c8-4e4f-a567-4bb579746d60</uuid>
+        </repository>
+        <wc-info>
+            <wcroot-abspath>C:/Users/rajput/R/svn/nAble/FeatureDevelopment/Monaco/TXM-603_HHR/2.02/trunk/Runtime/core/Games/BuffaloDeluxe</wcroot-abspath>
+            <schedule>normal</schedule>
+            <depth>infinity</depth>
+        </wc-info>
+        <commit revision="324270">
+            <author>rajput</author>
+            <date>2021-08-16T15:02:49.091280Z</date>
+        </commit>
+    </entry>
+</info>"##;
+        let info = SvnInfo::parse(XML);
+        println!("{:?}", info);
+        assert_eq!(1, 0);
+    }
 }

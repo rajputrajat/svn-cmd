@@ -101,10 +101,10 @@ impl SvnCmd {
 
     /// SVN INFO command: read svn info
     /// `svn info PATH`
-    pub async fn info(&self, target: Target) -> Result<SvnInfo, SvnError> {
-        trace!("");
-        Ok(SvnInfo {})
-    }
+    // pub async fn info(&self, target: Target) -> Result<SvnInfo, SvnError> {
+    //     trace!("");
+    //     Ok(SvnInfo {})
+    // }
 
     /// SVN DELETE command: delete file/dir from remote url
     /// `svn delete PATH`
