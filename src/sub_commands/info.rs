@@ -22,7 +22,7 @@ fn to_pathtype<'de, D>(deserializer: D) -> Result<PathType, D::Error>
 where
     D: Deserializer<'de>,
 {
-    let s: &str = Deserialize::deserialize(deserializer)?;
+    let s = String::deserialize(deserializer)?;
     if s == "dir" {
         Ok(PathType::Dir)
     } else if s == "file" {
@@ -36,24 +36,24 @@ fn to_url<'de, D>(deserializer: D) -> Result<Url, D::Error>
 where
     D: Deserializer<'de>,
 {
-    let s: &str = Deserialize::deserialize(deserializer)?;
-    Url::parse(s).map_err(de::Error::custom)
+    let s = String::deserialize(deserializer)?;
+    Url::parse(&s).map_err(de::Error::custom)
 }
 
 fn to_uuid<'de, D>(deserializer: D) -> Result<Uuid, D::Error>
 where
     D: Deserializer<'de>,
 {
-    let s: &str = Deserialize::deserialize(deserializer)?;
-    Uuid::parse_str(s).map_err(de::Error::custom)
+    let s = String::deserialize(deserializer)?;
+    Uuid::parse_str(&s).map_err(de::Error::custom)
 }
 
 fn to_chrono<'de, D>(deserializer: D) -> Result<DateTime<FixedOffset>, D::Error>
 where
     D: Deserializer<'de>,
 {
-    let s: &str = Deserialize::deserialize(deserializer)?;
-    DateTime::parse_from_rfc3339(s).map_err(de::Error::custom)
+    let s = String::deserialize(deserializer)?;
+    DateTime::parse_from_rfc3339(&s).map_err(de::Error::custom)
 }
 
 #[derive(Debug, Deserialize)]
