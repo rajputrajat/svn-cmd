@@ -16,6 +16,7 @@ struct InfoEntry {
     #[serde(rename(deserialize = "relative-url"))]
     relative_url: String,
     repository: EntryRepository,
+    commit: EntryCommit,
 }
 
 fn to_pathtype<'de, D>(deserializer: D) -> Result<PathType, D::Error>
@@ -112,7 +113,7 @@ mod tests {
     </entry>
 </info>"##;
         let info = SvnInfo::parse(XML);
-        println!("{:?}", info);
+        println!("{:#?}", info);
         assert_eq!(1, 0);
     }
 }
