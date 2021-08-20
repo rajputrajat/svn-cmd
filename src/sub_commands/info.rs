@@ -78,8 +78,8 @@ pub(crate) struct SvnInfo {
 }
 
 impl SvnInfo {
-    pub(crate) fn parse<T: Into<String>>(xml: T) -> Self {
-        serde_xml_rs::from_str(&xml.into()).unwrap()
+    pub(crate) fn parse(xml: &str) -> Self {
+        serde_xml_rs::from_str(xml).unwrap()
     }
 }
 
