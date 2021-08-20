@@ -3,17 +3,19 @@ use serde::{
     de::{self, Deserializer},
     Deserialize,
 };
+use url::Url;
 
 #[derive(Debug, Deserialize)]
 struct InfoEntry {
-    #[serde(deserialize_with = "into_pathtype")]
+    #[serde(deserialize_with = "to_pathtype")]
     kind: PathType,
-    url: String,
+    #[serde(deserialize_with = "to_url")]
+    url: Url,
     relative_url: String,
     repository: EntryRepository,
 }
 
-fn into_pathtype<'de, D>(deserializer: D) -> Result<PathType, D::Error>
+fn to_pathtype<'de, D>(deserializer: D) -> Result<PathType, D::Error>
 where
     D: Deserializer<'de>,
 {
@@ -25,6 +27,14 @@ where
     } else {
         Err(de::Error::custom("invalid file type"))
     }
+}
+
+fn to_url<'de, D>(deserializer: D) -> Result<Url, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let s: &str = Deserialize::deserialize(deserializer)?;
+    Url::parse(s).map_err(de::Error::custom)
 }
 
 #[derive(Debug, Deserialize)]
