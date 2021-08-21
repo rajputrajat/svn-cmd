@@ -12,7 +12,10 @@ use uuid::Uuid;
 impl SvnInfo {
     pub(crate) fn parse(xml: &str) -> Result<Self, SvnError> {
         match serde_xml_rs::from_str::<SvnInfo>(xml) {
-            Ok(v) => Ok(v),
+            Ok(v) => {
+                trace!("{:?}", v);
+                Ok(v)
+            }
             Err(e) => Err(SvnError::Deserializer { src: e }),
         }
     }
