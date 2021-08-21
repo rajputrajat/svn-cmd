@@ -18,7 +18,7 @@ pub struct LogIter(LogEntry);
 
 #[derive(Deserialize, Debug)]
 pub struct LogParser {
-    entry: LogEntry,
+    entry: Vec<LogEntry>,
 }
 
 #[derive(Deserialize, Debug)]
@@ -36,7 +36,11 @@ impl Iterator for SvnLog {
     fn next(&mut self) -> Option<Self::Item> {}
 }
 
-impl SvnLog {}
+impl SvnLog {
+    fn new_count(count: u32) -> Self {
+        Self {}
+    }
+}
 
 fn to_datetime<'de, D>(deserialize: D) -> Result<DateTime<FixedOffset>, D::Error>
 where
