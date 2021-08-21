@@ -1,11 +1,22 @@
+use crate::errors::SvnError;
 use crate::types::PathType;
 use chrono::prelude::*;
+use log::trace;
 use serde::{
     de::{self, Deserializer},
     Deserialize,
 };
 use url::Url;
 use uuid::Uuid;
+
+impl SvnInfo {
+    pub(crate) fn parse(xml: &str) -> Result<Self, SvnError> {
+        match serde_xml_rs::from_str::<SvnInfo>(xml) {
+            Ok(v) => Ok(v),
+            Err(e) => Err(SvnError::Deserializer { src: e }),
+        }
+    }
+}
 
 #[derive(Debug, Deserialize)]
 struct InfoEntry {
@@ -17,6 +28,28 @@ struct InfoEntry {
     relative_url: String,
     repository: EntryRepository,
     commit: EntryCommit,
+}
+
+#[derive(Debug, Deserialize)]
+struct EntryRepository {
+    #[serde(deserialize_with = "to_url")]
+    root: Url,
+    #[serde(deserialize_with = "to_uuid")]
+    uuid: Uuid,
+}
+
+#[derive(Debug, Deserialize)]
+struct EntryCommit {
+    revision: u32,
+    author: String,
+    #[serde(deserialize_with = "to_chrono")]
+    date: DateTime<FixedOffset>,
+}
+
+/// Return value of SvnCmd . info()
+#[derive(Debug, Deserialize)]
+pub(crate) struct SvnInfo {
+    entry: InfoEntry,
 }
 
 fn to_pathtype<'de, D>(deserializer: D) -> Result<PathType, D::Error>
@@ -55,34 +88,6 @@ where
 {
     let s = String::deserialize(deserializer)?;
     DateTime::parse_from_rfc3339(&s).map_err(de::Error::custom)
-}
-
-#[derive(Debug, Deserialize)]
-struct EntryRepository {
-    #[serde(deserialize_with = "to_url")]
-    root: Url,
-    #[serde(deserialize_with = "to_uuid")]
-    uuid: Uuid,
-}
-
-#[derive(Debug, Deserialize)]
-struct EntryCommit {
-    revision: u32,
-    author: String,
-    #[serde(deserialize_with = "to_chrono")]
-    date: DateTime<FixedOffset>,
-}
-
-/// Return value of SvnCmd . info()
-#[derive(Debug, Deserialize)]
-pub(crate) struct SvnInfo {
-    entry: InfoEntry,
-}
-
-impl SvnInfo {
-    pub(crate) fn parse(xml: &str) -> Self {
-        serde_xml_rs::from_str::<SvnInfo>(xml).unwrap()
-    }
 }
 
 #[cfg(test)]

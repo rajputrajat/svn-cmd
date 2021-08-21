@@ -18,6 +18,10 @@ pub enum SvnError {
     #[error("invalid utf8 output")]
     FromUtf8Error { src: FromUtf8Error },
 
+    /// invalid UTF8 output
+    #[error("error while deserializing")]
+    Deserializer { src: serde_xml_rs::Error },
+
     /// requested path doesn't exist
     #[error("requested path doesn't exist")]
     InvalidPath,
