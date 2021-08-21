@@ -9,6 +9,12 @@ use serde::{
 use url::Url;
 use uuid::Uuid;
 
+/// Return value of SvnCmd . info()
+#[derive(Debug, Deserialize)]
+pub struct SvnInfo {
+    pub entry: InfoEntry,
+}
+
 impl SvnInfo {
     pub(crate) fn parse(xml: &str) -> Result<Self, SvnError> {
         match serde_xml_rs::from_str::<SvnInfo>(xml) {
@@ -22,37 +28,31 @@ impl SvnInfo {
 }
 
 #[derive(Debug, Deserialize)]
-struct InfoEntry {
+pub struct InfoEntry {
     #[serde(deserialize_with = "to_pathtype")]
-    kind: PathType,
+    pub kind: PathType,
     #[serde(deserialize_with = "to_url")]
-    url: Url,
+    pub url: Url,
     #[serde(rename(deserialize = "relative-url"))]
-    relative_url: String,
+    pub relative_url: String,
     repository: EntryRepository,
-    commit: EntryCommit,
+    pub commit: EntryCommit,
 }
 
 #[derive(Debug, Deserialize)]
-struct EntryRepository {
+pub struct EntryRepository {
     #[serde(deserialize_with = "to_url")]
-    root: Url,
+    pub root: Url,
     #[serde(deserialize_with = "to_uuid")]
-    uuid: Uuid,
+    pub uuid: Uuid,
 }
 
 #[derive(Debug, Deserialize)]
-struct EntryCommit {
-    revision: u32,
-    author: String,
+pub struct EntryCommit {
+    pub revision: u32,
+    pub author: String,
     #[serde(deserialize_with = "to_chrono")]
-    date: DateTime<FixedOffset>,
-}
-
-/// Return value of SvnCmd . info()
-#[derive(Debug, Deserialize)]
-pub(crate) struct SvnInfo {
-    entry: InfoEntry,
+    pub date: DateTime<FixedOffset>,
 }
 
 fn to_pathtype<'de, D>(deserializer: D) -> Result<PathType, D::Error>
