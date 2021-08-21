@@ -48,9 +48,6 @@ pub enum RevisionType {
     Revision(u64),
 }
 
-/// Return value of SvnCmd . status()
-pub struct SvnStatus {}
-
 pub enum Target {
     Local(PathBuf),
     Remote(Url),

@@ -31,7 +31,7 @@ impl StatusItemType {
 
 #[derive(Debug)]
 pub struct SvnStatus {
-    status: HashMap<StatusItemType, Vec<PathBuf>>,
+    pub status: HashMap<StatusItemType, Vec<PathBuf>>,
 }
 
 impl SvnStatus {
@@ -53,7 +53,7 @@ impl SvnStatus {
 
 /// Return value of SvnCmd . status()
 #[derive(Debug, Deserialize)]
-pub struct StatusParser {
+struct StatusParser {
     target: StatusTarget,
 }
 
@@ -70,12 +70,12 @@ impl StatusParser {
 }
 
 #[derive(Debug, Deserialize)]
-pub struct StatusTarget {
+struct StatusTarget {
     entry: Vec<TargetEntry>,
 }
 
 #[derive(Debug, Deserialize)]
-pub struct TargetEntry {
+struct TargetEntry {
     #[serde(deserialize_with = "to_pathbuf")]
     path: PathBuf,
     #[serde(rename(deserialize = "wc-status"))]
@@ -83,7 +83,7 @@ pub struct TargetEntry {
 }
 
 #[derive(Debug, Deserialize)]
-pub struct WcStatus {
+struct WcStatus {
     #[serde(deserialize_with = "to_itemtype")]
     item: StatusItemType,
 }
