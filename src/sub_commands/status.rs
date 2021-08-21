@@ -5,8 +5,9 @@ use serde::{
     de::{self, Deserializer},
     Deserialize,
 };
+use std::collections::{hash_map::Entry::Vacant, HashMap};
 
-#[derive(Debug)]
+#[derive(Debug, Eq, PartialEq, Hash, Clone, Copy)]
 pub enum StatusItemType {
     Unversioned,
     External,
@@ -28,15 +29,37 @@ impl StatusItemType {
     }
 }
 
-/// Return value of SvnCmd . status()
-#[derive(Debug, Deserialize)]
+#[derive(Debug)]
 pub struct SvnStatus {
-    target: StatusTarget,
+    status: HashMap<StatusItemType, Vec<PathBuf>>,
 }
 
 impl SvnStatus {
     pub(crate) fn parse<T: AsRef<str>>(text: T) -> Result<Self, SvnError> {
-        match serde_xml_rs::from_str::<SvnStatus>(text.as_ref()) {
+        let status_vec = StatusParser::parse(text.as_ref())?;
+        let mut status_map: HashMap<StatusItemType, Vec<PathBuf>> = HashMap::new();
+        for entry in status_vec.target.entry {
+            let item = entry.wc_status.item;
+            let path = entry.path;
+            if let Vacant(e) = status_map.entry(item) {
+                e.insert(vec![path]);
+            } else {
+                status_map.get_mut(&item).unwrap().push(path); // we have already placed a check so unwrap is fine here
+            }
+        }
+        Ok(SvnStatus { status: status_map })
+    }
+}
+
+/// Return value of SvnCmd . status()
+#[derive(Debug, Deserialize)]
+pub struct StatusParser {
+    target: StatusTarget,
+}
+
+impl StatusParser {
+    pub(crate) fn parse<T: AsRef<str>>(text: T) -> Result<Self, SvnError> {
+        match serde_xml_rs::from_str::<StatusParser>(text.as_ref()) {
             Ok(v) => {
                 trace!("{:?}", v);
                 Ok(v)
