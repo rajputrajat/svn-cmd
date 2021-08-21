@@ -101,7 +101,9 @@ mod tests {
         };
 
         let mut sl = SvnLog::new(fetcher).unwrap();
-        println!("{:?}", sl.next());
+        (0..30).for_each(|_| {
+            println!("{:?}", sl.next());
+        });
         assert!(false);
     }
 
