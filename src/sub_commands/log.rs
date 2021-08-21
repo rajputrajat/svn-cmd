@@ -32,14 +32,14 @@ where
     fn fetch(&mut self, count: u32) -> Result<(), SvnError> {
         let text = (self.log_fetcher)(count);
         LogParser::parse(&text).map(|vl| {
-            self.queue.extend(vl.entry);
+            self.queue.extend(vl.logentry);
         })
     }
 }
 
 #[derive(Deserialize, Debug)]
 pub struct LogParser {
-    entry: Vec<LogEntry>,
+    logentry: Vec<LogEntry>,
 }
 
 #[derive(Deserialize, Debug)]
@@ -86,7 +86,7 @@ mod tests {
 
     #[test]
     fn fetch_logs() {
-        let fetcher = |count: u32| {
+        let fetcher = |_: u32| {
             let out = Command::new("svn")
                 .args(&[
                     "log",
