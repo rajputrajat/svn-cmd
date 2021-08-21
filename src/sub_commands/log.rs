@@ -61,7 +61,12 @@ where
 {
     type Item = LogIter;
 
-    fn next(&mut self) -> Option<Self::Item> {}
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.queue.is_empty() {
+            self.fetch(10);
+        }
+        self.queue.pop_front().map(|v| LogIter(v))
+    }
 }
 
 impl LogParser {
