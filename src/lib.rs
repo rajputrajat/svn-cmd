@@ -11,6 +11,7 @@ mod types;
 
 use cmd_wrapper::*;
 use errors::*;
+use sub_commands::info::SvnInfo;
 use types::*;
 
 /// Accessor to svn command functionality
@@ -101,10 +102,10 @@ impl SvnCmd {
 
     /// SVN INFO command: read svn info
     /// `svn info PATH`
-    // pub async fn info(&self, target: Target) -> Result<SvnInfo, SvnError> {
-    //     trace!("");
-    //     Ok(SvnInfo {})
-    // }
+    pub async fn info<T: AsRef<str>>(&self, target: T) -> Result<SvnInfo, SvnError> {
+        trace!("svn info: {}", target.as_ref());
+        SvnInfo::parse(target.as_ref())
+    }
 
     /// SVN DELETE command: delete file/dir from remote url
     /// `svn delete PATH`
