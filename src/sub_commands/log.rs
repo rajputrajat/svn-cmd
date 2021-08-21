@@ -1,16 +1,16 @@
 use crate::errors::SvnError;
 use chrono::prelude::*;
-use log::trace;
 use serde::{
     de::{self, Deserializer},
     Deserialize,
 };
 use std::collections::VecDeque;
+use std::future::Future;
 
 #[derive(Debug)]
 pub struct SvnLog<F>
 where
-    F: Fn(u32) -> String,
+    F: Fn(u32) -> Box<dyn Future<Output = String>>,
 {
     queue: VecDeque<LogEntry>,
     log_fetcher: F,
@@ -18,19 +18,19 @@ where
 
 impl<F> SvnLog<F>
 where
-    F: Fn(u32) -> String,
+    F: Fn(u32) -> Box<dyn Future<Output = String>>,
 {
-    fn new(log_fetcher: F) -> Result<Self, SvnError> {
+    async fn new(log_fetcher: F) -> Result<Self, SvnError> {
         let mut logger = Self {
             queue: VecDeque::new(),
             log_fetcher,
         };
-        logger.fetch(10)?;
+        logger.fetch(10).await?;
         Ok(logger)
     }
 
-    fn fetch(&mut self, count: u32) -> Result<(), SvnError> {
-        let text = (self.log_fetcher)(count);
+    async fn fetch(&mut self, count: u32) -> Result<(), SvnError> {
+        let text = (self.log_fetcher)(count).await;
         LogParser::parse(&text).map(|vl| {
             self.queue.extend(vl.logentry);
         })
@@ -53,7 +53,7 @@ pub struct LogEntry {
 
 impl<F> Iterator for SvnLog<F>
 where
-    F: Fn(u32) -> String,
+    F: Fn(u32) -> Box<dyn Future<Output = String>>,
 {
     type Item = LogEntry;
 
@@ -85,8 +85,8 @@ mod tests {
     use std::process::Command;
 
     #[test]
-    fn fetch_logs() {
-        let fetcher = |_: u32| {
+    async fn fetch_logs() {
+        let fetcher = |_: u32| async {
             let out = Command::new("svn")
                 .args(&[
                     "log",
@@ -100,7 +100,7 @@ mod tests {
             String::from_utf8(out.stdout).unwrap()
         };
 
-        let mut sl = SvnLog::new(fetcher).unwrap();
+        let mut sl = SvnLog::new(fetcher).await.unwrap();
         (0..30).for_each(|_| {
             println!("{:?}", sl.next());
         });
