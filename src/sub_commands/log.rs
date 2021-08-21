@@ -4,13 +4,12 @@ use serde::{
     de::{self, Deserializer},
     Deserialize,
 };
-use std::collections::VecDeque;
-use std::future::Future;
+use std::{collections::VecDeque, future::Future, pin::Pin};
 
 #[derive(Debug)]
 pub struct SvnLog<F>
 where
-    F: Fn(u32) -> Box<dyn Future<Output = String>>,
+    F: Fn(u32) -> Pin<Box<dyn Future<Output = String>>>,
 {
     queue: VecDeque<LogEntry>,
     log_fetcher: F,
@@ -18,7 +17,7 @@ where
 
 impl<F> SvnLog<F>
 where
-    F: Fn(u32) -> Box<dyn Future<Output = String>>,
+    F: Fn(u32) -> Pin<Box<dyn Future<Output = String>>>,
 {
     async fn new(log_fetcher: F) -> Result<Self, SvnError> {
         let mut logger = Self {
@@ -53,7 +52,7 @@ pub struct LogEntry {
 
 impl<F> Iterator for SvnLog<F>
 where
-    F: Fn(u32) -> Box<dyn Future<Output = String>>,
+    F: Fn(u32) -> Pin<Box<dyn Future<Output = String>>>,
 {
     type Item = LogEntry;
 
@@ -86,18 +85,20 @@ mod tests {
 
     #[test]
     async fn fetch_logs() {
-        let fetcher = |_: u32| async {
-            let out = Command::new("svn")
-                .args(&[
-                    "log",
-                    "--xml",
-                    "-l",
-                    "10",
-                    "https://svn.ali.global/GDK_games/GDK_games/BLS/NYL/",
-                ])
-                .output()
-                .unwrap();
-            String::from_utf8(out.stdout).unwrap()
+        let fetcher = |_: u32| {
+            Box::pin(async {
+                let out = Command::new("svn")
+                    .args(&[
+                        "log",
+                        "--xml",
+                        "-l",
+                        "10",
+                        "https://svn.ali.global/GDK_games/GDK_games/BLS/NYL/",
+                    ])
+                    .output()
+                    .unwrap();
+                String::from_utf8(out.stdout).unwrap()
+            })
         };
 
         let mut sl = SvnLog::new(fetcher).await.unwrap();
