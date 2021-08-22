@@ -49,6 +49,15 @@ mod tests {
         assert!(false);
     }
 
+    #[test]
+    fn list_iter() {
+        let mut list = SvnList::parse(LIST_XML).unwrap();
+        (0..10).for_each(|_| {
+            println!("{:?}\n", list.next());
+        });
+        assert!(false);
+    }
+
     const LIST_XML: &str = r##"
 <?xml version="1.0" encoding="UTF-8"?>
 <lists>
