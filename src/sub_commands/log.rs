@@ -102,20 +102,22 @@ mod tests {
 
     #[async_std::test]
     async fn fetch_logs() {
-        let fetcher = |c: RevCount, s: Option<StartRev>| -> Pin<Box<dyn Future<Output = String>>> {
-            Box::pin(async {
+        let fetcher = |c: RevCount, s: Option<StartRev>| -> Pin<Box<dyn Future<Output = XmlOut>>> {
+            Box::pin(async move {
+                let count_str = format!("{}", c.0);
                 let mut args = vec![
                     "log",
                     "--xml",
                     "-l",
-                    &format!("{}", c.0),
+                    &count_str,
                     "https://svn.ali.global/GDK_games/GDK_games/BLS/NYL/",
                 ];
+                let rev_range = format!("{}:0", s.unwrap().0);
                 if s.is_some() {
-                    args.extend(vec!["-r", &format!("{}:0", s.unwrap().0)])
+                    args.extend(vec!["-r", &rev_range]);
                 }
                 let out = Command::new("svn").args(&args).output().unwrap();
-                String::from_utf8(out.stdout).unwrap()
+                XmlOut(String::from_utf8(out.stdout).unwrap())
             })
         };
 
