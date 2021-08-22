@@ -42,12 +42,14 @@ where
         &mut self,
         (count, start): (RevCount, Option<StartRev>),
     ) -> Result<(), SvnError> {
-        let text: String = (self.log_fetcher)(count, start).await.0;
+        let text: String = (self.log_fetcher)(count, start.map(|s| StartRev(s.0 - 1)))
+            .await
+            .0;
         LogParser::parse(&text).map(|vl| {
             self.queue.extend(vl.logentry);
         })?;
         if let Some(b) = self.queue.back() {
-            self.last_entry_revision = Some(StartRev(b.revision + 1));
+            self.last_entry_revision = Some(StartRev(b.revision));
         }
         Ok(())
     }
