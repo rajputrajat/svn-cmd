@@ -1,4 +1,5 @@
 use crate::errors::SvnError;
+use async_std::task::block_on;
 use chrono::prelude::*;
 use serde::{
     de::{self, Deserializer},
@@ -9,7 +10,7 @@ use std::{collections::VecDeque, future::Future, pin::Pin};
 #[derive(Debug)]
 pub struct SvnLog<F>
 where
-    F: Fn(u32) -> Pin<Box<dyn Future<Output = String>>>,
+    F: Fn(u32) -> Pin<Box<dyn Future<Output = String> + 'static>>,
 {
     queue: VecDeque<LogEntry>,
     log_fetcher: F,
@@ -17,7 +18,7 @@ where
 
 impl<F> SvnLog<F>
 where
-    F: Fn(u32) -> Pin<Box<dyn Future<Output = String>>>,
+    F: Fn(u32) -> Pin<Box<dyn Future<Output = String> + 'static>>,
 {
     async fn new(log_fetcher: F) -> Result<Self, SvnError> {
         let mut logger = Self {
@@ -52,13 +53,13 @@ pub struct LogEntry {
 
 impl<F> Iterator for SvnLog<F>
 where
-    F: Fn(u32) -> Pin<Box<dyn Future<Output = String>>>,
+    F: Fn(u32) -> Pin<Box<dyn Future<Output = String> + 'static>>,
 {
     type Item = LogEntry;
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.queue.is_empty() {
-            let _ = self.fetch(10);
+            let _ = block_on(self.fetch(10));
         }
         self.queue.pop_front()
     }
@@ -83,7 +84,7 @@ mod tests {
     use super::*;
     use std::process::Command;
 
-    #[test]
+    #[async_std::test]
     async fn fetch_logs() {
         let fetcher = |_: u32| {
             Box::pin(async {
