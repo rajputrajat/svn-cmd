@@ -47,7 +47,7 @@ where
             self.queue.extend(vl.logentry);
         })?;
         if let Some(b) = self.queue.back() {
-            self.last_entry_revision = Some(StartRev(b.revision));
+            self.last_entry_revision = Some(StartRev(b.revision + 1));
         }
         Ok(())
     }
@@ -105,6 +105,7 @@ mod tests {
         let fetcher = |c: RevCount, s: Option<StartRev>| -> Pin<Box<dyn Future<Output = XmlOut>>> {
             Box::pin(async move {
                 let count_str = format!("{}", c.0);
+                let rev_range;
                 let mut args = vec![
                     "log",
                     "--xml",
@@ -112,8 +113,8 @@ mod tests {
                     &count_str,
                     "https://svn.ali.global/GDK_games/GDK_games/BLS/NYL/",
                 ];
-                let rev_range = format!("{}:0", s.unwrap().0);
-                if s.is_some() {
+                if let Some(s) = s {
+                    rev_range = format!("{}:0", s.0);
                     args.extend(vec!["-r", &rev_range]);
                 }
                 let out = Command::new("svn").args(&args).output().unwrap();
