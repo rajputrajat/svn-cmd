@@ -1,11 +1,12 @@
 use crate::errors::SvnError;
 use async_std::task::block_on;
 use chrono::prelude::*;
+use futures::{Future, FutureExt};
 use serde::{
     de::{self, Deserializer},
     Deserialize,
 };
-use std::{collections::VecDeque, future::Future, pin::Pin};
+use std::{collections::VecDeque, pin::Pin};
 
 #[derive(Debug)]
 pub struct SvnLog<F>
@@ -86,7 +87,7 @@ mod tests {
 
     #[async_std::test]
     async fn fetch_logs() {
-        let fetcher = |_: u32| {
+        let fetcher = |_: u32| -> Pin<Box<dyn Future<Output = String>>> {
             Box::pin(async {
                 let out = Command::new("svn")
                     .args(&[
