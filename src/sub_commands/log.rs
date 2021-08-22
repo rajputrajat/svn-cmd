@@ -1,7 +1,6 @@
 use crate::errors::SvnError;
-use async_std::task::block_on;
+use async_std::{future::Future, task::block_on};
 use chrono::prelude::*;
-use futures::{Future, FutureExt};
 use serde::{
     de::{self, Deserializer},
     Deserialize,
@@ -9,32 +8,48 @@ use serde::{
 use std::{collections::VecDeque, pin::Pin};
 
 #[derive(Debug)]
+struct RevCount(u32);
+#[derive(Debug)]
+struct StartRev(u32);
+#[derive(Debug)]
+struct XmlOut(Sting);
+
+#[derive(Debug)]
 pub struct SvnLog<F>
 where
-    F: Fn(u32) -> Pin<Box<dyn Future<Output = String>>>,
+    F: Fn(RevCount, Option<StartRev>) -> Pin<Box<dyn Future<Output = XmlOut>>>,
 {
     queue: VecDeque<LogEntry>,
     log_fetcher: F,
+    last_entry_revision: Option<StartRev>,
 }
 
 impl<F> SvnLog<F>
 where
-    F: Fn(u32) -> Pin<Box<dyn Future<Output = String>>>,
+    F: Fn(RevCount, Option<StartRev>) -> Pin<Box<dyn Future<Output = XmlOut>>>,
 {
     async fn new(log_fetcher: F) -> Result<Self, SvnError> {
         let mut logger = Self {
             queue: VecDeque::new(),
             log_fetcher,
+            last_entry_revision: None,
         };
-        logger.fetch(10).await?;
+        logger.fetch((RevCount(10), None)).await?;
         Ok(logger)
     }
 
-    async fn fetch(&mut self, count: u32) -> Result<(), SvnError> {
-        let text = (self.log_fetcher)(count).await;
+    async fn fetch(
+        &mut self,
+        (count, start): (RevCount, Option<StartRev>),
+    ) -> Result<(), SvnError> {
+        let text: String = (self.log_fetcher)(count, start).await.0;
         LogParser::parse(&text).map(|vl| {
             self.queue.extend(vl.logentry);
-        })
+        });
+        if let Some(b) = self.queue.back() {
+            self.last_entry_revision = Some(StartRev(b.revision));
+        }
+        Ok(())
     }
 }
 
@@ -54,13 +69,13 @@ pub struct LogEntry {
 
 impl<F> Iterator for SvnLog<F>
 where
-    F: Fn(u32) -> Pin<Box<dyn Future<Output = String>>>,
+    F: Fn(RevCount, Option<StartRev>) -> Pin<Box<dyn Future<Output = XmlOut>>>,
 {
     type Item = LogEntry;
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.queue.is_empty() {
-            let _ = block_on(self.fetch(10));
+            let _ = block_on(self.fetch((RevCount(10), self.last_entry_revision)));
         }
         self.queue.pop_front()
     }
@@ -87,18 +102,19 @@ mod tests {
 
     #[async_std::test]
     async fn fetch_logs() {
-        let fetcher = |_: u32| -> Pin<Box<dyn Future<Output = String>>> {
+        let fetcher = |c: RevCount, s: Option<StartRev>| -> Pin<Box<dyn Future<Output = String>>> {
             Box::pin(async {
-                let out = Command::new("svn")
-                    .args(&[
-                        "log",
-                        "--xml",
-                        "-l",
-                        "10",
-                        "https://svn.ali.global/GDK_games/GDK_games/BLS/NYL/",
-                    ])
-                    .output()
-                    .unwrap();
+                let mut args = vec![
+                    "log",
+                    "--xml",
+                    "-l",
+                    &format!("{}", c.0),
+                    "https://svn.ali.global/GDK_games/GDK_games/BLS/NYL/",
+                ];
+                if s.is_some() {
+                    args.extend(vec!["-r", &format!("{}:0", s.unwrap().0)])
+                }
+                let out = Command::new("svn").args(&args).output().unwrap();
                 String::from_utf8(out.stdout).unwrap()
             })
         };
