@@ -11,7 +11,7 @@ mod types;
 
 use cmd_wrapper::*;
 use errors::*;
-use sub_commands::{info::SvnInfo, status::SvnStatus};
+use sub_commands::{info::SvnInfo, log::SvnLog, status::SvnStatus};
 use types::*;
 
 /// Accessor to svn command functionality
@@ -88,9 +88,9 @@ impl SvnCmd {
 
     /// SVN LOG command: read svn logs
     /// `svn log REPO_URL | LOCAL_PATH`
-    pub async fn log(&self) -> Result<(), SvnError> {
+    pub async fn log(&self) -> Result<SvnLog, SvnError> {
         trace!("");
-        Ok(())
+        SvnLog::new().await
     }
 
     /// SVN STATUS command: svn path status
