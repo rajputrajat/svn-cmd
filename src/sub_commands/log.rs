@@ -10,7 +10,7 @@ use std::{collections::VecDeque, future::Future, pin::Pin};
 #[derive(Debug)]
 pub struct SvnLog<F>
 where
-    F: Fn(u32) -> Pin<Box<dyn Future<Output = String> + 'static>>,
+    F: Fn(u32) -> Pin<Box<dyn Future<Output = String>>>,
 {
     queue: VecDeque<LogEntry>,
     log_fetcher: F,
@@ -18,7 +18,7 @@ where
 
 impl<F> SvnLog<F>
 where
-    F: Fn(u32) -> Pin<Box<dyn Future<Output = String> + 'static>>,
+    F: Fn(u32) -> Pin<Box<dyn Future<Output = String>>>,
 {
     async fn new(log_fetcher: F) -> Result<Self, SvnError> {
         let mut logger = Self {
@@ -53,7 +53,7 @@ pub struct LogEntry {
 
 impl<F> Iterator for SvnLog<F>
 where
-    F: Fn(u32) -> Pin<Box<dyn Future<Output = String> + 'static>>,
+    F: Fn(u32) -> Pin<Box<dyn Future<Output = String>>>,
 {
     type Item = LogEntry;
 
@@ -102,7 +102,7 @@ mod tests {
             })
         };
 
-        let mut sl = SvnLog::new(fetcher).await.unwrap();
+        let mut sl: SvnLog<_> = SvnLog::new(fetcher).await.unwrap();
         (0..30).for_each(|_| {
             println!("{:?}", sl.next());
         });
