@@ -8,11 +8,11 @@ use serde::{
 use std::{collections::VecDeque, pin::Pin};
 
 #[derive(Debug)]
-struct RevCount(u32);
+pub struct RevCount(u32);
+#[derive(Debug, Clone, Copy)]
+pub struct StartRev(u32);
 #[derive(Debug)]
-struct StartRev(u32);
-#[derive(Debug)]
-struct XmlOut(Sting);
+pub struct XmlOut(String);
 
 #[derive(Debug)]
 pub struct SvnLog<F>
@@ -45,7 +45,7 @@ where
         let text: String = (self.log_fetcher)(count, start).await.0;
         LogParser::parse(&text).map(|vl| {
             self.queue.extend(vl.logentry);
-        });
+        })?;
         if let Some(b) = self.queue.back() {
             self.last_entry_revision = Some(StartRev(b.revision));
         }
