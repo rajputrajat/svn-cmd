@@ -23,7 +23,7 @@ impl SvnWrapper {
 
 // private methods
 impl SvnWrapper {
-    async fn common_cmd_runner(&self, args: &[&str]) -> Result<String, SvnError> {
+    pub(crate) async fn common_cmd_runner(&self, args: &[&str]) -> Result<String, SvnError> {
         match Command::new(&self.cmd).args(args).output().await {
             Ok(o) => {
                 if o.stderr.is_empty() {
