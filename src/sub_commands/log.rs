@@ -1,11 +1,12 @@
+use crate::cmd_wrapper::SvnWrapper;
 use crate::errors::SvnError;
-use async_std::{future::Future, task::block_on};
+use async_std::task::block_on;
 use chrono::prelude::*;
 use serde::{
     de::{self, Deserializer},
     Deserialize,
 };
-use std::{collections::VecDeque, pin::Pin};
+use std::collections::VecDeque;
 
 #[derive(Debug)]
 pub struct RevCount(u32);
@@ -15,24 +16,18 @@ pub struct StartRev(u32);
 pub struct XmlOut(String);
 
 #[derive(Debug)]
-pub struct SvnLog<F>
-where
-    F: Fn(RevCount, Option<StartRev>) -> Pin<Box<dyn Future<Output = XmlOut>>>,
-{
+pub struct SvnLog {
     queue: VecDeque<LogEntry>,
-    log_fetcher: F,
     last_entry_revision: Option<StartRev>,
+    target: String,
 }
 
-impl<F> SvnLog<F>
-where
-    F: Fn(RevCount, Option<StartRev>) -> Pin<Box<dyn Future<Output = XmlOut>>>,
-{
-    async fn new(log_fetcher: F) -> Result<Self, SvnError> {
+impl SvnLog {
+    pub(crate) async fn new<S: Into<String>>(target: S) -> Result<Self, SvnError> {
         let mut logger = Self {
             queue: VecDeque::new(),
-            log_fetcher,
             last_entry_revision: None,
+            target: target.into(),
         };
         logger.fetch((RevCount(10), None)).await?;
         Ok(logger)
@@ -42,8 +37,9 @@ where
         &mut self,
         (count, start): (RevCount, Option<StartRev>),
     ) -> Result<(), SvnError> {
-        let text: String = (self.log_fetcher)(count, start.map(|s| StartRev(s.0 - 1)))
-            .await
+        let text: String = self
+            .fetcher((count, start.map(|s| StartRev(s.0 - 1))))
+            .await?
             .0;
         LogParser::parse(&text).map(|vl| {
             self.queue.extend(vl.logentry);
@@ -52,6 +48,21 @@ where
             self.last_entry_revision = Some(StartRev(b.revision));
         }
         Ok(())
+    }
+
+    async fn fetcher(
+        &self,
+        (count, start): (RevCount, Option<StartRev>),
+    ) -> Result<XmlOut, SvnError> {
+        let count_str = format!("{}", count.0);
+        let rev_range;
+        let mut args = vec!["log", "--xml", "-l", &count_str, &self.target];
+        if let Some(s) = start {
+            rev_range = format!("{}:0", s.0);
+            args.extend(vec!["-r", &rev_range]);
+        }
+        let out = SvnWrapper::new().common_cmd_runner(&args).await?;
+        Ok(XmlOut(out))
     }
 }
 
@@ -69,10 +80,7 @@ pub struct LogEntry {
     msg: String,
 }
 
-impl<F> Iterator for SvnLog<F>
-where
-    F: Fn(RevCount, Option<StartRev>) -> Pin<Box<dyn Future<Output = XmlOut>>>,
-{
+impl Iterator for SvnLog {
     type Item = LogEntry;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -100,31 +108,11 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::process::Command;
-
     #[async_std::test]
     async fn fetch_logs() {
-        let fetcher = |c: RevCount, s: Option<StartRev>| -> Pin<Box<dyn Future<Output = XmlOut>>> {
-            Box::pin(async move {
-                let count_str = format!("{}", c.0);
-                let rev_range;
-                let mut args = vec![
-                    "log",
-                    "--xml",
-                    "-l",
-                    &count_str,
-                    "https://svn.ali.global/GDK_games/GDK_games/BLS/NYL/",
-                ];
-                if let Some(s) = s {
-                    rev_range = format!("{}:0", s.0);
-                    args.extend(vec!["-r", &rev_range]);
-                }
-                let out = Command::new("svn").args(&args).output().unwrap();
-                XmlOut(String::from_utf8(out.stdout).unwrap())
-            })
-        };
-
-        let mut sl: SvnLog<_> = SvnLog::new(fetcher).await.unwrap();
+        let mut sl: SvnLog = SvnLog::new("https://svn.ali.global/GDK_games/GDK_games/BLS/NYL/")
+            .await
+            .unwrap();
         (0..40).for_each(|_| {
             println!("{:?}\n", sl.next());
         });

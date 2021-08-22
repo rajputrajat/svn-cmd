@@ -88,9 +88,9 @@ impl SvnCmd {
 
     /// SVN LOG command: read svn logs
     /// `svn log REPO_URL | LOCAL_PATH`
-    pub async fn log(&self) -> Result<SvnLog, SvnError> {
+    pub async fn log(&self, target: &str) -> Result<SvnLog, SvnError> {
         trace!("");
-        SvnLog::new().await
+        SvnLog::new(target).await
     }
 
     /// SVN STATUS command: svn path status
