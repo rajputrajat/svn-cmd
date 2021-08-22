@@ -11,7 +11,7 @@ mod types;
 
 use cmd_wrapper::*;
 use errors::*;
-use sub_commands::{info::SvnInfo, log::SvnLog, status::SvnStatus};
+use sub_commands::{info::SvnInfo, list::SvnList, log::SvnLog, status::SvnStatus};
 use types::*;
 
 /// Accessor to svn command functionality
@@ -41,9 +41,14 @@ impl SvnCmd {
     }
 
     /// get list of files
-    pub async fn list() -> Result<(), SvnError> {
+    pub async fn list(target: &str, recursive: bool) -> Result<SvnList, SvnError> {
         trace!("");
-        Ok(())
+        let mut args = vec!["list", "--xml", target];
+        if recursive {
+            args.push("--recursive");
+        }
+        let xml_text = SvnWrapper::new().common_cmd_runner(&args).await?;
+        SvnList::parse(&xml_text)
     }
 
     /// get diff
