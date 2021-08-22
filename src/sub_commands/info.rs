@@ -55,7 +55,7 @@ pub struct EntryCommit {
     pub date: DateTime<FixedOffset>,
 }
 
-fn to_pathtype<'de, D>(deserializer: D) -> Result<PathType, D::Error>
+pub(crate) fn to_pathtype<'de, D>(deserializer: D) -> Result<PathType, D::Error>
 where
     D: Deserializer<'de>,
 {
