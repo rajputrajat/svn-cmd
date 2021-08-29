@@ -9,16 +9,17 @@ mod errors;
 mod sub_commands;
 mod types;
 
-use cmd_wrapper::*;
-use errors::*;
+use crate::types::{Credentials, LoginOptions, Optionals, ToCmdArgs};
+use cmd_wrapper::SvnWrapper;
+use errors::SvnError;
 use sub_commands::{
     info::SvnInfo, list::SvnList, log::SvnLog, status::SvnStatus, version::CmdVersion,
 };
-use types::*;
 
 /// Accessor to svn command functionality
 pub struct SvnCmd {
     options: LoginOptions,
+    extra_args: Option<String>,
 }
 
 /// Builder to create SvnCmd
@@ -28,12 +29,16 @@ impl SvnCmd {
     /// create SvnCmd struct
     pub fn new(creds: Credentials, more: Option<Optionals>) -> Result<SvnCmd, SvnError> {
         trace!("");
-        Ok(SvnCmd {
-            options: LoginOptions {
-                credentials: creds,
-                more: more.unwrap_or_default(),
-            },
-        })
+        let options = LoginOptions {
+            credentials: creds,
+            more: more.unwrap_or_default(),
+        };
+        let extra_args = options.to_cmd_args();
+        let cmd = SvnCmd {
+            options,
+            extra_args: Some(extra_args),
+        };
+        Ok(cmd)
     }
 
     /// get svn version installed
@@ -162,5 +167,19 @@ impl SvnCmd {
     pub async fn mkdir(&self) -> Result<(), SvnError> {
         trace!("");
         Ok(())
+    }
+}
+
+// following is for private methods
+// impl SvnCmd {
+// async fn get_cmd_out(&self, args: &[&str]) -> Result(String, SvnError) {
+//     let mut args =
+//     SvnWrapper::new().common_cmd_runner(&args).await
+// }
+// }
+
+impl ToCmdArgs for SvnCmd {
+    fn to_cmd_args(&self) -> String {
+        self.options.to_cmd_args()
     }
 }

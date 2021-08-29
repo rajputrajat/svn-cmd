@@ -3,10 +3,23 @@
 use async_std::path::PathBuf;
 use url::Url;
 
+pub(crate) trait ToCmdArgs {
+    fn to_cmd_args(&self) -> String;
+}
+
 /// Credentials
 pub struct Credentials {
     pub username: String,
     pub password: String,
+}
+
+impl ToCmdArgs for Credentials {
+    fn to_cmd_args(&self) -> String {
+        format!(
+            " --username {} --password {} ",
+            self.username, self.password
+        )
+    }
 }
 
 /// optional values
@@ -15,6 +28,27 @@ pub struct Optionals {
     pub non_interactive: bool,
     pub trust_server_cert: bool, // this is valid only when non_interactive is `true`
     pub config_options: Option<String>,
+}
+
+impl ToCmdArgs for Optionals {
+    fn to_cmd_args(&self) -> String {
+        let mut args = String::new();
+        if self.cache_auth_tokens {
+            args.push_str(" --no-auth-cache ");
+        }
+        if self.non_interactive {
+            args.push_str(" --non-interactive ");
+        }
+        if self.trust_server_cert {
+            args.push_str(" --trust-server-cert ");
+        }
+        if let Some(config_ops) = &self.config_options {
+            args.push(' ');
+            args.push_str(config_ops);
+            args.push(' ');
+        }
+        args
+    }
 }
 
 impl Default for Optionals {
@@ -32,6 +66,16 @@ impl Default for Optionals {
 pub struct LoginOptions {
     pub credentials: Credentials,
     pub more: Optionals,
+}
+
+impl ToCmdArgs for LoginOptions {
+    fn to_cmd_args(&self) -> String {
+        format!(
+            " {} {} ",
+            self.credentials.to_cmd_args(),
+            self.more.to_cmd_args()
+        )
+    }
 }
 
 /// file or dir
