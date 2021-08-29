@@ -46,10 +46,6 @@ impl CmdVersion {
         trace!("svn version out: {:?}", ret);
         Ok(ret)
     }
-
-    pub(crate) async fn get_cmd_out() -> Result<String, SvnError> {
-        SvnWrapper::new().common_cmd_runner(&["--version"]).await
-    }
 }
 
 #[cfg(test)]

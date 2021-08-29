@@ -1,7 +1,6 @@
 //! This lib wraps svn command line tool on your system
 #![deny(missing_docs)]
 #![deny(unsafe_code)]
-use log::trace;
 use std::result::Result;
 
 mod cmd_wrapper;
@@ -19,7 +18,7 @@ use sub_commands::{
 /// Accessor to svn command functionality
 pub struct SvnCmd {
     options: LoginOptions,
-    extra_args: Option<String>,
+    extra_args: String,
 }
 
 /// Builder to create SvnCmd
@@ -28,7 +27,6 @@ pub struct SvnCmdBuilder {}
 impl SvnCmd {
     /// create SvnCmd struct
     pub fn new(creds: Credentials, more: Option<Optionals>) -> Result<SvnCmd, SvnError> {
-        trace!("");
         let options = LoginOptions {
             credentials: creds,
             more: more.unwrap_or_default(),
@@ -36,150 +34,129 @@ impl SvnCmd {
         let extra_args = options.to_cmd_args();
         let cmd = SvnCmd {
             options,
-            extra_args: Some(extra_args),
+            extra_args,
         };
         Ok(cmd)
     }
 
     /// get svn version installed
     pub async fn version() -> Result<CmdVersion, SvnError> {
-        trace!("getting svn version");
-        let out = CmdVersion::get_cmd_out().await?;
+        let out = SvnWrapper::new().common_cmd_runner(&["--version"]).await?;
         CmdVersion::parse(&out).await
     }
 
     /// get list of files
-    pub async fn list(target: &str, recursive: bool) -> Result<SvnList, SvnError> {
-        trace!("");
+    pub async fn list(&self, target: &str, recursive: bool) -> Result<SvnList, SvnError> {
         let mut args = vec!["list", "--xml", target];
         if recursive {
             args.push("--recursive");
         }
-        let xml_text = SvnWrapper::new().common_cmd_runner(&args).await?;
+        let xml_text = self.get_cmd_out(&args).await?;
         SvnList::parse(&xml_text)
     }
 
     /// get diff
     pub async fn diff() -> Result<(), SvnError> {
-        trace!("");
         Ok(())
     }
 
     /// read file content
     pub async fn cat() -> Result<String, SvnError> {
-        trace!("");
         Ok("".to_owned())
     }
 
     /// SVN ADD command to add new files to stage for commit operation
     /// `svn add PATH`
     pub async fn add(&self) -> Result<(), SvnError> {
-        trace!("");
         Ok(())
     }
 
     /// SVN COMMIT command to commit changes to remote repo
     /// `svn commit -m "dummy log message"`
     pub async fn commit_local_changes(&self) -> Result<(), SvnError> {
-        trace!("");
         Ok(())
     }
 
     /// SVN CHECKOUT command: checkout files from mentioned repo url
     /// `svn checkout REPO_URL LOCAL_PATH`
     pub async fn checkout(&self) -> Result<(), SvnError> {
-        trace!("");
         Ok(())
     }
 
     /// SVN UPDATE command: update local svn dir with remote repo
     /// `svn update`
     pub async fn update(&self) -> Result<(), SvnError> {
-        trace!("");
         Ok(())
     }
 
     /// SVN LOG command: read svn logs
     /// `svn log REPO_URL | LOCAL_PATH`
     pub async fn log(&self, target: &str) -> Result<SvnLog, SvnError> {
-        trace!("");
         SvnLog::new(target).await
     }
 
     /// SVN STATUS command: svn path status
     /// `svn status PATH`
-    pub async fn status<T: AsRef<str>>(&self, target: T) -> Result<SvnStatus, SvnError> {
-        trace!("");
-        SvnStatus::parse(target.as_ref())
+    pub async fn status(&self, target: &str) -> Result<SvnStatus, SvnError> {
+        let out = self.get_cmd_out(&["status", "--xml", target]).await?;
+        SvnStatus::parse(&out)
     }
 
     /// SVN INFO command: read svn info
     /// `svn info PATH`
-    pub async fn info<T: AsRef<str>>(&self, target: T) -> Result<SvnInfo, SvnError> {
-        trace!("svn info: {}", target.as_ref());
-        SvnInfo::parse(target.as_ref())
+    pub async fn info(&self, target: &str) -> Result<SvnInfo, SvnError> {
+        let out = self.get_cmd_out(&["info", "--xml", target]).await?;
+        SvnInfo::parse(&out)
     }
 
     /// SVN DELETE command: delete file/dir from remote url
     /// `svn delete PATH`
     pub async fn delete(&self) -> Result<(), SvnError> {
-        trace!("");
         Ok(())
     }
 
     /// SVN REVERT command: revert to specific commit
     /// `svn revert PATH`
     pub async fn revert(&self) -> Result<(), SvnError> {
-        trace!("");
         Ok(())
     }
 
     /// SVN COPY command: copy from svn repo path to mentioned path
     /// `svn copy CURR_PATH NEW_PATH`
     pub async fn copy_to(&self) -> Result<(), SvnError> {
-        trace!("");
         Ok(())
     }
 
     /// SVN SWITCH command: switch current working svn path to requested path
     /// `svn switch CURR_PATH NEW_PATH`
     pub async fn switch(&self) -> Result<(), SvnError> {
-        trace!("");
         Ok(())
     }
 
     /// SVN MERGE command: merge change-sets from mentioned repo
     /// `svn merge [--dry-run] --force From_URL@revN To_URL@revM PATH`
     pub async fn merge(&self) -> Result<(), SvnError> {
-        trace!("");
         Ok(())
     }
 
     /// SVN IMPORT command: import dir/files from local filesystem
     /// `svn import -m "<commit message>"`
     pub async fn import(&self) -> Result<(), SvnError> {
-        trace!("");
         Ok(())
     }
 
     /// SVN MKDIR command: create a dir in svn repo
     /// `svn mkdir -m "<commit message>"`
     pub async fn mkdir(&self) -> Result<(), SvnError> {
-        trace!("");
         Ok(())
     }
 }
 
 // following is for private methods
-// impl SvnCmd {
-// async fn get_cmd_out(&self, args: &[&str]) -> Result(String, SvnError) {
-//     let mut args =
-//     SvnWrapper::new().common_cmd_runner(&args).await
-// }
-// }
-
-impl ToCmdArgs for SvnCmd {
-    fn to_cmd_args(&self) -> String {
-        self.options.to_cmd_args()
+impl SvnCmd {
+    async fn get_cmd_out(&self, args: &[&str]) -> Result<String, SvnError> {
+        let mut all_args: Vec<&str> = vec![&self.extra_args];
+        all_args.extend_from_slice(args);
+        SvnWrapper::new().common_cmd_runner(&all_args).await
     }
 }

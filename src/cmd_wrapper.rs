@@ -2,6 +2,7 @@
 
 use crate::errors::SvnError;
 use async_std::process::Command;
+use log::trace;
 
 /// cmd wrapper struct
 pub(crate) struct SvnWrapper {
@@ -24,6 +25,7 @@ impl SvnWrapper {
 // private methods
 impl SvnWrapper {
     pub(crate) async fn common_cmd_runner(&self, args: &[&str]) -> Result<String, SvnError> {
+        trace!("command args: {:?}", args);
         match Command::new(&self.cmd).args(args).output().await {
             Ok(o) => {
                 if o.stderr.is_empty() {
