@@ -16,7 +16,7 @@ pub struct CmdVersion {
 
 impl CmdVersion {
     pub(crate) async fn parse(cmd_out: &str) -> Result<Self, SvnError> {
-        let re = Regex::new(r"(\d+\.\d+\.\d+).*(r\d+)")
+        let re = Regex::new(r"(\d+\.\d+\.\d+).*r(\d+)")
             .map_err(|e| SvnError::Other(format!("error while running regex: {:?}", e)))?;
         //let out = CmdVersion::get_cmd_out().await?;
         let first_line = cmd_out
@@ -34,7 +34,7 @@ impl CmdVersion {
         let built_rev =
             RevisionNumber(built_rev.parse::<u32>().map_err(|e| {
                 SvnError::Other(format!("invalid num: {:?}, e: {:?}", built_rev, e))
-            }))?;
+            })?);
         let cmd_path = which::which("svn")
             .map_err(|e| SvnError::Other(format!("which not found for svn: {:?}", e)))?;
         Ok(Self {
@@ -59,7 +59,7 @@ mod tests {
         assert_eq!(
             cmd_ver,
             CmdVersion {
-                cmd_path: PathBuf::from(""),
+                cmd_path: PathBuf::from("C:\\Program Files\\TortoiseSVN\\bin\\svn.EXE"),
                 version: Version::new(1, 14, 1),
                 built_rev: RevisionNumber(1_886_195)
             }
