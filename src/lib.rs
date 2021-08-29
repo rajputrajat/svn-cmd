@@ -11,7 +11,9 @@ mod types;
 
 use cmd_wrapper::*;
 use errors::*;
-use sub_commands::{info::SvnInfo, list::SvnList, log::SvnLog, status::SvnStatus};
+use sub_commands::{
+    info::SvnInfo, list::SvnList, log::SvnLog, status::SvnStatus, version::CmdVersion,
+};
 use types::*;
 
 /// Accessor to svn command functionality
@@ -35,9 +37,10 @@ impl SvnCmd {
     }
 
     /// get svn version installed
-    pub async fn version() -> Result<String, SvnError> {
-        trace!("");
-        Ok("".to_owned())
+    pub async fn version() -> Result<CmdVersion, SvnError> {
+        trace!("getting svn version");
+        let out = CmdVersion::get_cmd_out().await?;
+        CmdVersion::parse(&out).await
     }
 
     /// get list of files

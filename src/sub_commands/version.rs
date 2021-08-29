@@ -1,5 +1,6 @@
 use crate::cmd_wrapper::SvnWrapper;
 use crate::SvnError;
+use log::trace;
 use regex::Regex;
 use semver::Version;
 use std::path::PathBuf;
@@ -37,11 +38,13 @@ impl CmdVersion {
             })?);
         let cmd_path = which::which("svn")
             .map_err(|e| SvnError::Other(format!("which not found for svn: {:?}", e)))?;
-        Ok(Self {
+        let ret = Self {
             cmd_path,
             version,
             built_rev,
-        })
+        };
+        trace!("svn version out: {:?}", ret);
+        Ok(ret)
     }
 
     pub(crate) async fn get_cmd_out() -> Result<String, SvnError> {
