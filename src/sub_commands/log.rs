@@ -14,31 +14,25 @@ pub struct StartRev(pub u32);
 #[derive(Debug)]
 pub struct XmlOut(pub String);
 
+pub(crate) type LogFetcher = fn(
+    String,
+    String,
+    (RevCount, Option<StartRev>),
+) -> Pin<Box<dyn Future<Output = Result<XmlOut, SvnError>>>>;
+
 pub struct SvnLog {
     queue: VecDeque<LogEntry>,
     last_entry_revision: Option<StartRev>,
     args: String,
     target: String,
-    fetcher: Box<
-        dyn (Fn(
-            String,
-            String,
-            (RevCount, Option<StartRev>),
-        ) -> Pin<Box<dyn Future<Output = Result<XmlOut, SvnError>>>>),
-    >,
+    fetcher: LogFetcher,
 }
 
 impl SvnLog {
     pub(crate) async fn new(
         args: &[&str],
         target: &str,
-        fetcher: Box<
-            dyn Fn(
-                String,
-                String,
-                (RevCount, Option<StartRev>),
-            ) -> Pin<Box<dyn Future<Output = Result<XmlOut, SvnError>>>>,
-        >,
+        fetcher: LogFetcher,
     ) -> Result<Self, SvnError> {
         let mut logger = Self {
             queue: VecDeque::new(),
@@ -47,20 +41,13 @@ impl SvnLog {
             target: target.to_owned(),
             fetcher,
         };
-        logger.fetch((RevCount(10), None), fetcher).await?;
+        logger.fetch((RevCount(10), None)).await?;
         Ok(logger)
     }
 
     async fn fetch(
         &mut self,
         (count, start): (RevCount, Option<StartRev>),
-        fetcher: Box<
-            dyn Fn(
-                String,
-                String,
-                (RevCount, Option<StartRev>),
-            ) -> Pin<Box<dyn Future<Output = Result<XmlOut, SvnError>>>>,
-        >,
     ) -> Result<(), SvnError> {
         let text: String = (self.fetcher)(
             self.args.clone(),
@@ -113,7 +100,7 @@ impl Iterator for SvnLog {
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.queue.is_empty() {
-            let _ = block_on(self.fetch((RevCount(10), self.last_entry_revision), self.fetcher));
+            let _ = block_on(self.fetch((RevCount(10), self.last_entry_revision)));
         }
         self.queue.pop_front()
     }

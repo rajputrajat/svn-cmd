@@ -9,10 +9,6 @@ mod sub_commands;
 mod types;
 
 use crate::types::{Credentials, LoginOptions, Optionals, ToCmdArgs};
-use async_std::{
-    future::{ready, Future},
-    pin::Pin,
-};
 use cmd_wrapper::SvnWrapper;
 use errors::SvnError;
 use sub_commands::{
@@ -174,7 +170,7 @@ impl SvnCmd {
         args: String,
         target: String,
         (count, start): (RevCount, Option<StartRev>),
-    ) -> Pin<Box<dyn Future<Output = Result<XmlOut, SvnError>>>> {
+    ) -> Result<XmlOut, SvnError> {
         let count_str = format!("{}", count.0);
         let rev_range;
         let mut args: Vec<&str> = vec![&args];
@@ -182,9 +178,6 @@ impl SvnCmd {
             rev_range = format!("{}:0", s.0);
             args.extend(vec!["-r", &rev_range]);
         }
-        match SvnWrapper::new().common_cmd_runner(&args).await {
-            Ok(o) => Box::pin(ready(Ok(XmlOut(o)))),
-            Err(e) => Box::pin(ready(Err(e))),
-        }
+        Ok(XmlOut(SvnWrapper::new().common_cmd_runner(&args).await?))
     }
 }
