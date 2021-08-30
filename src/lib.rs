@@ -96,7 +96,7 @@ impl SvnCmd {
     /// SVN LOG command: read svn logs
     /// `svn log REPO_URL | LOCAL_PATH`
     pub async fn log(&self, target: &str) -> Result<SvnLog, SvnError> {
-        let mut args = vec!["log", "--xml", "-l"];
+        let mut args = vec!["log", "--xml"];
         args.push(&self.extra_args);
         SvnLog::new(
             &args,
@@ -176,13 +176,14 @@ impl SvnCmd {
         target: String,
         (count, start): (RevCount, Option<StartRev>),
     ) -> Result<XmlOut, SvnError> {
-        let count_str = format!("{}", count.0);
+        let count_str = format!("-l {}", count.0);
         let rev_range;
-        let mut args: Vec<&str> = vec![&args];
+        let mut args: Vec<&str> = vec![&args, &count_str];
         if let Some(s) = start {
             rev_range = format!("{}:0", s.0);
             args.extend(vec!["-r", &rev_range]);
         }
+        args.push(&target);
         Ok(XmlOut(SvnWrapper::new().common_cmd_runner(&args).await?))
     }
 }
