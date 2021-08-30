@@ -98,7 +98,6 @@ impl SvnCmd {
     pub async fn log(&self, target: &str) -> Result<SvnLog, SvnError> {
         let mut args = vec!["log", "--xml", "-l"];
         args.push(&self.extra_args);
-        //SvnLog::new(&args, target, SvnCmd::log_fetcher).await
         SvnLog::new(
             &args,
             target,

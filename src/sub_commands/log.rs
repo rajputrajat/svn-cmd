@@ -66,21 +66,6 @@ impl SvnLog {
         }
         Ok(())
     }
-
-    // async fn fetcher(
-    //     &self,
-    //     (count, start): (RevCount, Option<StartRev>),
-    // ) -> Result<XmlOut, SvnError> {
-    //     let count_str = format!("{}", count.0);
-    //     let rev_range;
-    //     let mut args = vec!["log", "--xml", "-l", &count_str, &self.target];
-    //     if let Some(s) = start {
-    //         rev_range = format!("{}:0", s.0);
-    //         args.extend(vec!["-r", &rev_range]);
-    //     }
-    //     let out = SvnWrapper::new().common_cmd_runner(&args).await?;
-    //     Ok(XmlOut(out))
-    // }
 }
 
 #[derive(Deserialize, Debug)]
