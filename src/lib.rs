@@ -12,7 +12,11 @@ use crate::types::{Credentials, LoginOptions, Optionals, ToCmdArgs};
 use cmd_wrapper::SvnWrapper;
 use errors::SvnError;
 use sub_commands::{
-    info::SvnInfo, list::SvnList, log::SvnLog, status::SvnStatus, version::CmdVersion,
+    info::SvnInfo,
+    list::SvnList,
+    log::{RevCount, StartRev, SvnLog, XmlOut},
+    status::SvnStatus,
+    version::CmdVersion,
 };
 
 /// Accessor to svn command functionality
@@ -92,7 +96,9 @@ impl SvnCmd {
     /// SVN LOG command: read svn logs
     /// `svn log REPO_URL | LOCAL_PATH`
     pub async fn log(&self, target: &str) -> Result<SvnLog, SvnError> {
-        SvnLog::new(target).await
+        let mut args = vec!["log", "--xml", "-l"];
+        args.push(&self.extra_args);
+        SvnLog::new(&args, target, SvnCmd::log_fetcher).await
     }
 
     /// SVN STATUS command: svn path status
@@ -158,5 +164,21 @@ impl SvnCmd {
         let mut all_args: Vec<&str> = vec![&self.extra_args];
         all_args.extend_from_slice(args);
         SvnWrapper::new().common_cmd_runner(&all_args).await
+    }
+
+    async fn log_fetcher(
+        args: String,
+        target: String,
+        (count, start): (RevCount, Option<StartRev>),
+    ) -> Result<XmlOut, SvnError> {
+        let count_str = format!("{}", count.0);
+        let rev_range;
+        let mut args: Vec<&str> = vec![&args];
+        if let Some(s) = start {
+            rev_range = format!("{}:0", s.0);
+            args.extend(vec!["-r", &rev_range]);
+        }
+        let out = SvnWrapper::new().common_cmd_runner(&args).await?;
+        Ok(XmlOut(out))
     }
 }

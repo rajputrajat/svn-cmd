@@ -1,4 +1,3 @@
-use crate::cmd_wrapper::SvnWrapper;
 use crate::SvnError;
 use log::trace;
 use regex::Regex;

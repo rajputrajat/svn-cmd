@@ -1,6 +1,5 @@
-use crate::cmd_wrapper::SvnWrapper;
 use crate::errors::SvnError;
-use async_std::task::block_on;
+use async_std::{future::Future, task::block_on};
 use chrono::prelude::*;
 use serde::{
     de::{self, Deserializer},
@@ -9,25 +8,42 @@ use serde::{
 use std::collections::VecDeque;
 
 #[derive(Debug)]
-pub struct RevCount(u32);
+pub struct RevCount(pub u32);
 #[derive(Debug, Clone, Copy)]
-pub struct StartRev(u32);
+pub struct StartRev(pub u32);
 #[derive(Debug)]
-pub struct XmlOut(String);
+pub struct XmlOut(pub String);
 
-#[derive(Debug)]
 pub struct SvnLog {
     queue: VecDeque<LogEntry>,
     last_entry_revision: Option<StartRev>,
+    args: String,
     target: String,
+    fetcher: Box<
+        dyn Fn(
+            String,
+            String,
+            (RevCount, Option<StartRev>),
+        ) -> dyn Future<Output = Result<XmlOut, SvnError>>,
+    >,
 }
 
 impl SvnLog {
-    pub(crate) async fn new<S: Into<String>>(target: S) -> Result<Self, SvnError> {
+    pub(crate) async fn new<F, Fut>(
+        args: &[&str],
+        target: &str,
+        fetcher: F,
+    ) -> Result<Self, SvnError>
+    where
+        F: Fn(String, String, (RevCount, Option<StartRev>)) -> Fut,
+        Fut: Future<Output = Result<XmlOut, SvnError>>,
+    {
         let mut logger = Self {
             queue: VecDeque::new(),
             last_entry_revision: None,
-            target: target.into(),
+            args: args.iter().map(|s| format!(" {} ", s)).collect(),
+            target: target.to_owned(),
+            fetcher: Box::new(fetcher),
         };
         logger.fetch((RevCount(10), None)).await?;
         Ok(logger)
@@ -37,10 +53,13 @@ impl SvnLog {
         &mut self,
         (count, start): (RevCount, Option<StartRev>),
     ) -> Result<(), SvnError> {
-        let text: String = self
-            .fetcher((count, start.map(|s| StartRev(s.0 - 1))))
-            .await?
-            .0;
+        let text: String = (self.fetcher)(
+            &self.args,
+            &self.target,
+            (count, start.map(|s| StartRev(s.0 - 1))),
+        )
+        .await?
+        .0;
         LogParser::parse(&text).map(|vl| {
             self.queue.extend(vl.logentry);
         })?;
@@ -50,20 +69,20 @@ impl SvnLog {
         Ok(())
     }
 
-    async fn fetcher(
-        &self,
-        (count, start): (RevCount, Option<StartRev>),
-    ) -> Result<XmlOut, SvnError> {
-        let count_str = format!("{}", count.0);
-        let rev_range;
-        let mut args = vec!["log", "--xml", "-l", &count_str, &self.target];
-        if let Some(s) = start {
-            rev_range = format!("{}:0", s.0);
-            args.extend(vec!["-r", &rev_range]);
-        }
-        let out = SvnWrapper::new().common_cmd_runner(&args).await?;
-        Ok(XmlOut(out))
-    }
+    // async fn fetcher(
+    //     &self,
+    //     (count, start): (RevCount, Option<StartRev>),
+    // ) -> Result<XmlOut, SvnError> {
+    //     let count_str = format!("{}", count.0);
+    //     let rev_range;
+    //     let mut args = vec!["log", "--xml", "-l", &count_str, &self.target];
+    //     if let Some(s) = start {
+    //         rev_range = format!("{}:0", s.0);
+    //         args.extend(vec!["-r", &rev_range]);
+    //     }
+    //     let out = SvnWrapper::new().common_cmd_runner(&args).await?;
+    //     Ok(XmlOut(out))
+    // }
 }
 
 #[derive(Deserialize, Debug)]
