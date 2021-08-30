@@ -14,11 +14,13 @@ pub struct StartRev(pub u32);
 #[derive(Debug)]
 pub struct XmlOut(pub String);
 
-pub(crate) type LogFetcher = fn(
-    String,
-    String,
-    (RevCount, Option<StartRev>),
-) -> Pin<Box<dyn Future<Output = Result<XmlOut, SvnError>>>>;
+pub(crate) type LogFetcher = Box<
+    dyn Fn(
+        String,
+        String,
+        (RevCount, Option<StartRev>),
+    ) -> Pin<Box<dyn Future<Output = Result<XmlOut, SvnError>>>>,
+>;
 
 pub struct SvnLog {
     queue: VecDeque<LogEntry>,
