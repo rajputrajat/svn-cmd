@@ -1,5 +1,5 @@
 use crate::errors::SvnError;
-use async_std::{future::Future, task::block_on};
+use async_std::{future::Future, pin::Pin, task::block_on};
 use chrono::prelude::*;
 use serde::{
     de::{self, Deserializer},
@@ -20,42 +20,51 @@ pub struct SvnLog {
     args: String,
     target: String,
     fetcher: Box<
-        dyn Fn(
+        dyn (Fn(
             String,
             String,
             (RevCount, Option<StartRev>),
-        ) -> dyn Future<Output = Result<XmlOut, SvnError>>,
+        ) -> Pin<Box<dyn Future<Output = Result<XmlOut, SvnError>>>>),
     >,
 }
 
 impl SvnLog {
-    pub(crate) async fn new<F, Fut>(
+    pub(crate) async fn new(
         args: &[&str],
         target: &str,
-        fetcher: F,
-    ) -> Result<Self, SvnError>
-    where
-        F: Fn(String, String, (RevCount, Option<StartRev>)) -> Fut,
-        Fut: Future<Output = Result<XmlOut, SvnError>>,
-    {
+        fetcher: Box<
+            dyn Fn(
+                String,
+                String,
+                (RevCount, Option<StartRev>),
+            ) -> Pin<Box<dyn Future<Output = Result<XmlOut, SvnError>>>>,
+        >,
+    ) -> Result<Self, SvnError> {
         let mut logger = Self {
             queue: VecDeque::new(),
             last_entry_revision: None,
             args: args.iter().map(|s| format!(" {} ", s)).collect(),
             target: target.to_owned(),
-            fetcher: Box::new(fetcher),
+            fetcher,
         };
-        logger.fetch((RevCount(10), None)).await?;
+        logger.fetch((RevCount(10), None), fetcher).await?;
         Ok(logger)
     }
 
     async fn fetch(
         &mut self,
         (count, start): (RevCount, Option<StartRev>),
+        fetcher: Box<
+            dyn Fn(
+                String,
+                String,
+                (RevCount, Option<StartRev>),
+            ) -> Pin<Box<dyn Future<Output = Result<XmlOut, SvnError>>>>,
+        >,
     ) -> Result<(), SvnError> {
         let text: String = (self.fetcher)(
-            &self.args,
-            &self.target,
+            self.args.clone(),
+            self.target.clone(),
             (count, start.map(|s| StartRev(s.0 - 1))),
         )
         .await?
@@ -104,7 +113,7 @@ impl Iterator for SvnLog {
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.queue.is_empty() {
-            let _ = block_on(self.fetch((RevCount(10), self.last_entry_revision)));
+            let _ = block_on(self.fetch((RevCount(10), self.last_entry_revision), self.fetcher));
         }
         self.queue.pop_front()
     }
