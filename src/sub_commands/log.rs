@@ -1,6 +1,7 @@
 use crate::errors::SvnError;
 use async_std::{future::Future, pin::Pin, task::block_on};
 use chrono::prelude::*;
+use fix_hidden_lifetime_bug::fix_hidden_lifetime_bug;
 use serde::{
     de::{self, Deserializer},
     Deserialize,
@@ -31,6 +32,7 @@ pub struct SvnLog {
 }
 
 impl SvnLog {
+    #[fix_hidden_lifetime_bug]
     pub(crate) async fn new(
         args: &[&str],
         target: &str,

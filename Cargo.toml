@@ -19,6 +19,7 @@ chrono = "~0.4"
 which = "~4.2"
 semver = "~1.0"
 regex = "~1.5"
+fix-hidden-lifetime-bug = "~0.2"
 
 [dev-dependencies]
 env_logger = "~0.8"
