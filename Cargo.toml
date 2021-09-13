@@ -8,18 +8,18 @@ license = "MIT"
 edition = "2018"
 
 [dependencies]
-log = "~0.4"
-thiserror = "~1"
-async-std = { version = "~1.9", features = ["attributes", "unstable"] }
-url = "~2.2"
-serde-xml-rs = "~0.5"
-serde = { version = "~1.0", features = ["derive"] }
-uuid = "~0.8"
-chrono = "~0.4"
-which = "~4.2"
-semver = "~1.0"
-regex = "~1.5"
-fix-hidden-lifetime-bug = "~0.2"
+log = "^0.4"
+thiserror = "^1"
+async-std = { version = "^1.9", features = ["attributes", "unstable"] }
+url = "^2.2"
+serde-xml-rs = "^0.5"
+serde = { version = "^1.0", features = ["derive"] }
+uuid = "^0.8"
+chrono = "^0.4"
+which = "^4.2"
+semver = "^1.0"
+regex = "^1.5"
+fix-hidden-lifetime-bug = "^0.2"
 
 [dev-dependencies]
-env_logger = "~0.8"
+env_logger = "^0.8"
