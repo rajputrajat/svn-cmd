@@ -18,10 +18,10 @@ struct ListsList {
 #[derive(Deserialize, Debug)]
 pub struct ListEntry {
     #[serde(deserialize_with = "to_pathtype")]
-    kind: PathType,
-    name: String,
+    pub kind: PathType,
+    pub name: String,
     size: Option<u32>,
-    commit: EntryCommit,
+    pub commit: EntryCommit,
 }
 
 impl SvnList {

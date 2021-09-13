@@ -6,6 +6,7 @@ use std::result::Result;
 mod cmd_wrapper;
 mod errors;
 mod sub_commands;
+mod tree;
 mod types;
 
 pub use crate::{
@@ -13,7 +14,8 @@ pub use crate::{
     sub_commands::{
         info::SvnInfo, list::SvnList, log::SvnLog, status::SvnStatus, version::CmdVersion,
     },
-    types::{Credentials, LoginOptions, Optionals},
+    tree::SvnTreeWalk,
+    types::{Credentials, LoginOptions, Optionals, PathType},
 };
 
 use crate::{
