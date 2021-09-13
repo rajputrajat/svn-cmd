@@ -23,6 +23,7 @@ use crate::{
 };
 
 /// Accessor to svn command functionality
+#[derive(Clone)]
 pub struct SvnCmd {
     options: LoginOptions,
     extra_args: String,
