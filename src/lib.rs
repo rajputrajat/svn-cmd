@@ -164,13 +164,24 @@ impl SvnCmd {
     pub async fn mkdir(&self) -> Result<(), SvnError> {
         Ok(())
     }
+
+    /// SVN <raw> command: run a raw command
+    /// `svn <raw_cmd>
+    pub async fn raw_cmd(&self, cmd: &str) -> Result<String, SvnError> {
+        let args: Vec<&str> = cmd.split_whitespace().into_iter().collect();
+        self.get_cmd_out(&args).await
+    }
 }
 
 // following is for private methods
 impl SvnCmd {
     async fn get_cmd_out(&self, args: &[&str]) -> Result<String, SvnError> {
-        let mut all_args: Vec<&str> = vec![&self.extra_args];
+        let mut all_args: Vec<&str> = Vec::new();
         all_args.extend_from_slice(args);
+        self.extra_args
+            .split_whitespace()
+            .into_iter()
+            .for_each(|s| all_args.push(s));
         SvnWrapper::new().common_cmd_runner(&all_args).await
     }
 
