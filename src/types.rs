@@ -79,7 +79,7 @@ impl ToCmdArgs for LoginOptions {
 }
 
 /// file or dir
-#[derive(Debug)]
+#[derive(Debug, PartialEq, PartialOrd)]
 pub enum PathType {
     File,
     Dir,
