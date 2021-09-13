@@ -1,6 +1,6 @@
 //! This lib wraps svn command line tool on your system
-#![deny(missing_docs)]
-#![deny(unsafe_code)]
+#![warn(missing_docs)]
+#![warn(unsafe_code)]
 use std::result::Result;
 
 mod cmd_wrapper;
@@ -8,15 +8,18 @@ mod errors;
 mod sub_commands;
 mod types;
 
-use crate::types::{Credentials, LoginOptions, Optionals, ToCmdArgs};
-use cmd_wrapper::SvnWrapper;
-use errors::SvnError;
-use sub_commands::{
-    info::SvnInfo,
-    list::SvnList,
-    log::{RevCount, StartRev, SvnLog, XmlOut},
-    status::SvnStatus,
-    version::CmdVersion,
+pub use crate::{
+    errors::SvnError,
+    sub_commands::{
+        info::SvnInfo, list::SvnList, log::SvnLog, status::SvnStatus, version::CmdVersion,
+    },
+    types::{Credentials, LoginOptions, Optionals},
+};
+
+use crate::{
+    cmd_wrapper::SvnWrapper,
+    sub_commands::log::{RevCount, StartRev, XmlOut},
+    types::ToCmdArgs,
 };
 
 /// Accessor to svn command functionality
