@@ -167,7 +167,7 @@ impl SvnCmd {
 
     /// SVN <raw> command: run a raw command
     /// `svn <raw_cmd>
-    pub async fn raw_cmd(&self, cmd: &str) -> Result<String, SvnError> {
+    pub async fn raw_cmd(&self, cmd: String) -> Result<String, SvnError> {
         let args: Vec<&str> = cmd.split_whitespace().into_iter().collect();
         self.get_cmd_out(&args).await
     }
