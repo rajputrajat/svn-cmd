@@ -40,11 +40,11 @@ pub struct ListInspector<'a> {
     iter: Iter<'a, ListEntry>,
 }
 
-impl Iterator for SvnList {
-    type Item = ListEntry;
+impl<'a> Iterator for ListInspector<'a> {
+    type Item = &'a ListEntry;
 
     fn next(&mut self) -> Option<Self::Item> {
-        self.list.entry.pop_front()
+        self.iter.next()
     }
 }
 
@@ -63,7 +63,7 @@ mod tests {
     fn list_iter() {
         let mut list = SvnList::parse(LIST_XML).unwrap();
         (0..10).for_each(|_| {
-            println!("{:?}\n", list.next());
+            println!("{:?}\n", list.iter().next());
         });
         assert!(false);
     }
