@@ -36,6 +36,14 @@ impl SvnList {
     }
 }
 
+impl IntoIterator for SvnList {
+    type Item = ListEntry;
+    type IntoIter = std::collections::vec_deque::IntoIter<Self::Item>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.list.entry.into_iter()
+    }
+}
+
 pub struct ListInspector<'a> {
     iter: Iter<'a, ListEntry>,
 }
