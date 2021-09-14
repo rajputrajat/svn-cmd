@@ -3,7 +3,7 @@ use crate::{
     types::PathType,
 };
 use serde::Deserialize;
-use std::collections::VecDeque;
+use std::{collections::vec_deque::Iter, collections::VecDeque};
 
 #[derive(Deserialize, Debug)]
 pub struct SvnList {
@@ -28,6 +28,16 @@ impl SvnList {
     pub(crate) fn parse(xml_text: &str) -> Result<Self, SvnError> {
         serde_xml_rs::from_str::<Self>(xml_text).map_err(|e| SvnError::Deserializer { src: e })
     }
+
+    pub fn iter(&self) -> ListInspector {
+        ListInspector {
+            iter: self.list.entry.iter(),
+        }
+    }
+}
+
+pub struct ListInspector<'a> {
+    iter: Iter<'a, ListEntry>,
 }
 
 impl Iterator for SvnList {
