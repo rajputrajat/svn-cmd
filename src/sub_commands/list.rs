@@ -20,7 +20,7 @@ pub struct ListEntry {
     #[serde(deserialize_with = "to_pathtype")]
     pub kind: PathType,
     pub name: String,
-    size: Option<u32>,
+    size: Option<usize>,
     pub commit: EntryCommit,
 }
 
