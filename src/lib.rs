@@ -63,6 +63,11 @@ impl SvnCmd {
         SvnList::parse(&xml_text)
     }
 
+    /// get list of files
+    pub async fn list_from_svn_list_xml_output(&self, xml_str: &str) -> Result<SvnList, SvnError> {
+        SvnList::parse(xml_str)
+    }
+
     /// get diff
     pub async fn diff() -> Result<(), SvnError> {
         Ok(())
