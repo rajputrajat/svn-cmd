@@ -69,8 +69,8 @@ impl SvnCmd {
     }
 
     /// read file content
-    pub async fn cat() -> Result<String, SvnError> {
-        Ok("".to_owned())
+    pub async fn cat(&self, target: &str) -> Result<String, SvnError> {
+        self.get_cmd_out(&["cat", target]).await
     }
 
     /// SVN ADD command to add new files to stage for commit operation
