@@ -15,12 +15,17 @@ struct ListsList {
     entry: VecDeque<ListEntry>,
 }
 
+/// SvnList is madeup of these entries
 #[derive(Deserialize, Debug)]
 pub struct ListEntry {
     #[serde(deserialize_with = "to_pathtype")]
+    /// is file or dir
     pub kind: PathType,
+    /// relative path name
     pub name: String,
+    /// file size
     size: Option<usize>,
+    /// commit structure
     pub commit: EntryCommit,
 }
 

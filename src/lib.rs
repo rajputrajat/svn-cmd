@@ -11,7 +11,11 @@ mod types;
 pub use crate::{
     errors::SvnError,
     sub_commands::{
-        info::SvnInfo, list::SvnList, log::SvnLog, status::SvnStatus, version::CmdVersion,
+        info::SvnInfo,
+        list::{ListEntry, SvnList},
+        log::SvnLog,
+        status::SvnStatus,
+        version::CmdVersion,
     },
     types::{Credentials, LoginOptions, Optionals, PathType},
 };
