@@ -11,7 +11,7 @@ mod types;
 pub use crate::{
     errors::SvnError,
     sub_commands::{
-        info::SvnInfo,
+        info::{EntryCommit, SvnInfo},
         list::{ListEntry, ListsList, SvnList},
         log::SvnLog,
         status::SvnStatus,
