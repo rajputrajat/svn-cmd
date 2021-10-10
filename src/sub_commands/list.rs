@@ -11,7 +11,7 @@ pub struct SvnList {
 }
 
 #[derive(Deserialize, Debug)]
-struct ListsList {
+pub struct ListsList {
     entry: VecDeque<ListEntry>,
 }
 

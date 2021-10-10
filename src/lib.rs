@@ -12,7 +12,7 @@ pub use crate::{
     errors::SvnError,
     sub_commands::{
         info::SvnInfo,
-        list::{ListEntry, SvnList},
+        list::{ListEntry, ListsList, SvnList},
         log::SvnLog,
         status::SvnStatus,
         version::CmdVersion,
