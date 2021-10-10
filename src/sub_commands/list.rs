@@ -7,12 +7,12 @@ use std::{collections::vec_deque::Iter, collections::VecDeque};
 
 #[derive(Deserialize, Debug)]
 pub struct SvnList {
-    list: ListsList,
+    pub list: ListsList,
 }
 
 #[derive(Deserialize, Debug)]
 pub struct ListsList {
-    entry: VecDeque<ListEntry>,
+    pub entry: VecDeque<ListEntry>,
 }
 
 /// SvnList is madeup of these entries
