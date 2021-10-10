@@ -41,7 +41,7 @@ pub struct EntryRepository {
     pub uuid: String,
 }
 
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, Deserialize, Clone, PartialEq)]
 pub struct EntryCommit {
     pub revision: u32,
     pub author: String,
