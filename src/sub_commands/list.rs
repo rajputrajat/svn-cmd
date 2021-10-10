@@ -16,7 +16,7 @@ pub struct ListsList {
 }
 
 /// SvnList is madeup of these entries
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, PartialEq)]
 pub struct ListEntry {
     #[serde(deserialize_with = "to_pathtype")]
     /// is file or dir
