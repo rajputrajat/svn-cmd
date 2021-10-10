@@ -24,7 +24,7 @@ pub struct ListEntry {
     /// relative path name
     pub name: String,
     /// file size
-    size: Option<usize>,
+    pub size: Option<usize>,
     /// commit structure
     pub commit: EntryCommit,
 }
