@@ -25,6 +25,7 @@ use crate::{
     sub_commands::log::{RevCount, StartRev, XmlOut},
     types::ToCmdArgs,
 };
+use log::trace;
 
 /// Accessor to svn command functionality
 #[derive(Clone)]
@@ -64,6 +65,7 @@ impl SvnCmd {
             args.push("--recursive");
         }
         let xml_text = self.get_cmd_out(&args).await?;
+        trace!("{}", xml_text);
         SvnList::parse(&xml_text)
     }
 
