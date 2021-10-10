@@ -3,7 +3,7 @@ use crate::{
     types::PathType,
 };
 use serde::Deserialize;
-use std::{collections::vec_deque::Iter, collections::VecDeque};
+use std::{collections::vec_deque::Iter, collections::VecDeque, fmt::Display};
 
 #[derive(Deserialize, Debug, Clone)]
 pub struct SvnList {
@@ -16,7 +16,7 @@ pub struct ListsList {
 }
 
 /// SvnList is madeup of these entries
-#[derive(Deserialize, Debug, PartialEq, Clone)]
+#[derive(Deserialize, PartialEq, Clone, Debug)]
 pub struct ListEntry {
     #[serde(deserialize_with = "to_pathtype")]
     /// is file or dir
@@ -27,6 +27,16 @@ pub struct ListEntry {
     pub size: Option<usize>,
     /// commit structure
     pub commit: EntryCommit,
+}
+
+impl Display for ListEntry {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "kind: {:?}, name: {}, size: {:?}, commit: {:?}",
+            self.kind, self.name, self.size, self.commit
+        )
+    }
 }
 
 impl SvnList {
