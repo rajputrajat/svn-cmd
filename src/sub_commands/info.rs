@@ -1,13 +1,10 @@
 use crate::errors::SvnError;
 use crate::types::PathType;
-use chrono::prelude::*;
 use log::trace;
 use serde::{
     de::{self, Deserializer},
     Deserialize,
 };
-use url::Url;
-use uuid::Uuid;
 
 /// Return value of SvnCmd . info()
 #[derive(Debug, Deserialize)]
@@ -31,8 +28,7 @@ impl SvnInfo {
 pub struct InfoEntry {
     #[serde(deserialize_with = "to_pathtype")]
     pub kind: PathType,
-    #[serde(deserialize_with = "to_url")]
-    pub url: Url,
+    pub url: String,
     #[serde(rename(deserialize = "relative-url"))]
     pub relative_url: String,
     repository: EntryRepository,
@@ -41,18 +37,15 @@ pub struct InfoEntry {
 
 #[derive(Debug, Deserialize)]
 pub struct EntryRepository {
-    #[serde(deserialize_with = "to_url")]
-    pub root: Url,
-    #[serde(deserialize_with = "to_uuid")]
-    pub uuid: Uuid,
+    pub root: String,
+    pub uuid: String,
 }
 
 #[derive(Debug, Deserialize, Clone)]
 pub struct EntryCommit {
     pub revision: u32,
     pub author: String,
-    #[serde(deserialize_with = "to_chrono")]
-    pub date: DateTime<FixedOffset>,
+    pub date: String,
 }
 
 pub(crate) fn to_pathtype<'de, D>(deserializer: D) -> Result<PathType, D::Error>
@@ -67,30 +60,6 @@ where
     } else {
         Err(de::Error::custom("invalid file type"))
     }
-}
-
-fn to_url<'de, D>(deserializer: D) -> Result<Url, D::Error>
-where
-    D: Deserializer<'de>,
-{
-    let s = String::deserialize(deserializer)?;
-    Url::parse(&s).map_err(de::Error::custom)
-}
-
-fn to_uuid<'de, D>(deserializer: D) -> Result<Uuid, D::Error>
-where
-    D: Deserializer<'de>,
-{
-    let s = String::deserialize(deserializer)?;
-    Uuid::parse_str(&s).map_err(de::Error::custom)
-}
-
-fn to_chrono<'de, D>(deserializer: D) -> Result<DateTime<FixedOffset>, D::Error>
-where
-    D: Deserializer<'de>,
-{
-    let s = String::deserialize(deserializer)?;
-    DateTime::parse_from_rfc3339(&s).map_err(de::Error::custom)
 }
 
 #[cfg(test)]

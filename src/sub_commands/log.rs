@@ -1,6 +1,5 @@
 use crate::errors::SvnError;
 use async_std::{future::Future, pin::Pin, task::block_on};
-use chrono::prelude::*;
 use fix_hidden_lifetime_bug::fix_hidden_lifetime_bug;
 use serde::{
     de::{self, Deserializer},
@@ -79,8 +78,7 @@ pub struct LogParser {
 pub struct LogEntry {
     revision: u32,
     author: String,
-    #[serde(deserialize_with = "to_datetime")]
-    date: DateTime<FixedOffset>,
+    date: String,
     msg: String,
 }
 
@@ -99,14 +97,6 @@ impl LogParser {
     fn parse(text: &str) -> Result<Self, SvnError> {
         serde_xml_rs::from_str::<Self>(text).map_err(|e| SvnError::Deserializer { src: e })
     }
-}
-
-fn to_datetime<'de, D>(deserialize: D) -> Result<DateTime<FixedOffset>, D::Error>
-where
-    D: Deserializer<'de>,
-{
-    let s = String::deserialize(deserialize)?;
-    DateTime::parse_from_rfc3339(&s).map_err(de::Error::custom)
 }
 
 #[cfg(test)]
