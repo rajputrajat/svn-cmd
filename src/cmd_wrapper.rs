@@ -1,8 +1,8 @@
 //! this module will implement all svn cmd wrapper
 
 use crate::errors::SvnError;
-use async_std::process::Command;
 use log::trace;
+use std::process::Command;
 
 /// cmd wrapper struct
 pub(crate) struct SvnWrapper {
@@ -24,9 +24,9 @@ impl SvnWrapper {
 
 // private methods
 impl SvnWrapper {
-    pub(crate) async fn common_cmd_runner(&self, args: &[&str]) -> Result<String, SvnError> {
+    pub(crate) fn common_cmd_runner(&self, args: &[&str]) -> Result<String, SvnError> {
         trace!("command args: {:?}", args);
-        match Command::new(&self.cmd).args(args).output().await {
+        match Command::new(&self.cmd).args(args).output() {
             Ok(o) => {
                 if o.stderr.is_empty() {
                     String::from_utf8(o.stdout).map_err(|e| SvnError::FromUtf8Error { src: e })
@@ -49,11 +49,11 @@ impl SvnWrapper {
 mod tests {
     use super::*;
 
-    #[async_std::test]
+    #[test]
     #[should_panic]
-    async fn simple_run() {
+    fn simple_run() {
         let wrap = SvnWrapper::new();
-        let out = dbg!(wrap.common_cmd_runner(&["info"]).await);
+        let out = dbg!(wrap.common_cmd_runner(&["info"]));
         assert_eq!(out.unwrap(), " ".to_owned());
     }
 }

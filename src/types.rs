@@ -1,6 +1,6 @@
 //! this implements svn types
 
-use async_std::path::PathBuf;
+use std::path::PathBuf;
 use url::Url;
 
 pub(crate) trait ToCmdArgs {

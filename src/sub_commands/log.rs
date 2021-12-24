@@ -1,10 +1,5 @@
 use crate::errors::SvnError;
-use async_std::{future::Future, pin::Pin, task::block_on};
-use fix_hidden_lifetime_bug::fix_hidden_lifetime_bug;
-use serde::{
-    de::{self, Deserializer},
-    Deserialize,
-};
+use serde::Deserialize;
 use std::collections::VecDeque;
 
 #[derive(Debug)]
@@ -14,13 +9,8 @@ pub struct StartRev(pub u32);
 #[derive(Debug)]
 pub struct XmlOut(pub String);
 
-pub(crate) type LogFetcher = Box<
-    dyn Fn(
-        String,
-        String,
-        (RevCount, Option<StartRev>),
-    ) -> Pin<Box<dyn Future<Output = Result<XmlOut, SvnError>>>>,
->;
+pub(crate) type LogFetcher =
+    Box<dyn Fn(String, String, (RevCount, Option<StartRev>)) -> Result<XmlOut, SvnError>>;
 
 pub struct SvnLog {
     queue: VecDeque<LogEntry>,
@@ -31,12 +21,7 @@ pub struct SvnLog {
 }
 
 impl SvnLog {
-    #[fix_hidden_lifetime_bug]
-    pub(crate) async fn new(
-        args: &[&str],
-        target: &str,
-        fetcher: LogFetcher,
-    ) -> Result<Self, SvnError> {
+    pub(crate) fn new(args: &[&str], target: &str, fetcher: LogFetcher) -> Result<Self, SvnError> {
         let mut logger = Self {
             queue: VecDeque::new(),
             last_entry_revision: None,
@@ -44,20 +29,16 @@ impl SvnLog {
             target: target.to_owned(),
             fetcher,
         };
-        logger.fetch((RevCount(10), None)).await?;
+        logger.fetch((RevCount(10), None))?;
         Ok(logger)
     }
 
-    async fn fetch(
-        &mut self,
-        (count, start): (RevCount, Option<StartRev>),
-    ) -> Result<(), SvnError> {
+    fn fetch(&mut self, (count, start): (RevCount, Option<StartRev>)) -> Result<(), SvnError> {
         let text: String = (self.fetcher)(
             self.args.clone(),
             self.target.clone(),
             (count, start.map(|s| StartRev(s.0 - 1))),
-        )
-        .await?
+        )?
         .0;
         LogParser::parse(&text).map(|vl| {
             self.queue.extend(vl.logentry);
@@ -87,7 +68,7 @@ impl Iterator for SvnLog {
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.queue.is_empty() {
-            let _ = block_on(self.fetch((RevCount(10), self.last_entry_revision)));
+            let _ = self.fetch((RevCount(10), self.last_entry_revision));
         }
         self.queue.pop_front()
     }
@@ -102,11 +83,10 @@ impl LogParser {
 #[cfg(test)]
 mod tests {
     use super::*;
-    #[async_std::test]
-    async fn fetch_logs() {
-        let mut sl: SvnLog = SvnLog::new("https://svn.ali.global/GDK_games/GDK_games/BLS/NYL/")
-            .await
-            .unwrap();
+    #[test]
+    fn fetch_logs() {
+        let mut sl: SvnLog =
+            SvnLog::new("https://svn.ali.global/GDK_games/GDK_games/BLS/NYL/").unwrap();
         (0..40).for_each(|_| {
             println!("{:?}\n", sl.next());
         });

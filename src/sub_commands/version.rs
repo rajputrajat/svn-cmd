@@ -15,10 +15,10 @@ pub struct CmdVersion {
 }
 
 impl CmdVersion {
-    pub(crate) async fn parse(cmd_out: &str) -> Result<Self, SvnError> {
+    pub(crate) fn parse(cmd_out: &str) -> Result<Self, SvnError> {
         let re = Regex::new(r"(\d+\.\d+\.\d+).*r(\d+)")
             .map_err(|e| SvnError::Other(format!("error while running regex: {:?}", e)))?;
-        //let out = CmdVersion::get_cmd_out().await?;
+        //let out = CmdVersion::get_cmd_out()?;
         let first_line = cmd_out
             .lines()
             .next()
@@ -51,9 +51,9 @@ impl CmdVersion {
 mod tests {
     use super::*;
 
-    #[async_std::test]
-    async fn check_version_parser() {
-        let cmd_ver = CmdVersion::parse(VERSION_OUT).await.unwrap();
+    #[test]
+    fn check_version_parser() {
+        let cmd_ver = CmdVersion::parse(VERSION_OUT).unwrap();
         assert_eq!(
             cmd_ver,
             CmdVersion {

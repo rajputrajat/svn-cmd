@@ -1,11 +1,11 @@
 use crate::errors::SvnError;
-use async_std::path::PathBuf;
 use log::trace;
 use serde::{
     de::{self, Deserializer},
     Deserialize,
 };
 use std::collections::{hash_map::Entry::Vacant, HashMap};
+use std::path::PathBuf;
 
 #[derive(Debug, Eq, PartialEq, Hash, Clone, Copy)]
 pub enum StatusItemType {
