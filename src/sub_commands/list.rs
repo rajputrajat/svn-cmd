@@ -39,11 +39,16 @@ impl Display for ListEntry {
     }
 }
 
+/// if this returns `true` list recursively, otherwise skip
+pub type ListFilter = dyn Fn(&str, ListEntry) -> Result<bool, SvnError>;
+
 impl SvnList {
+    /// parse XML text
     pub(crate) fn parse(xml_text: &str) -> Result<Self, SvnError> {
         serde_xml_rs::from_str::<Self>(xml_text).map_err(|e| SvnError::Deserializer { src: e })
     }
 
+    /// returns iterator
     pub fn iter(&self) -> ListInspector {
         ListInspector {
             iter: self.list.entry.iter(),
