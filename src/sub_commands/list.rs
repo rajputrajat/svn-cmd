@@ -5,12 +5,12 @@ use crate::{
 use serde::Deserialize;
 use std::{collections::vec_deque::Iter, collections::VecDeque, fmt::Display};
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone, Default)]
 pub struct SvnList {
     pub list: ListsList,
 }
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone, Default)]
 pub struct ListsList {
     pub entry: VecDeque<ListEntry>,
 }
