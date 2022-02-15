@@ -39,7 +39,7 @@ pub struct SvnCmdBuilder {}
 
 impl SvnCmd {
     /// create SvnCmd struct
-    pub fn new(creds: Credentials, more: Option<Optionals>) -> Result<SvnCmd, SvnError> {
+    pub fn new(creds: Credentials, more: Option<Optionals>) -> SvnCmd {
         let options = LoginOptions {
             credentials: creds,
             more: more.unwrap_or_default(),
@@ -49,7 +49,7 @@ impl SvnCmd {
             options,
             extra_args,
         };
-        Ok(cmd)
+        cmd
     }
 
     /// get svn version installed
