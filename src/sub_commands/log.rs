@@ -9,8 +9,9 @@ pub struct StartRev(pub u32);
 #[derive(Debug)]
 pub struct XmlOut(pub String);
 
-pub(crate) type LogFetcher =
-    Arc<dyn Fn(String, String, (RevCount, Option<StartRev>)) -> Result<XmlOut, SvnError> + Send>;
+pub(crate) type LogFetcher = Arc<
+    dyn Fn(String, String, (RevCount, Option<StartRev>)) -> Result<XmlOut, SvnError> + Send + Sync,
+>;
 
 #[derive(Clone)]
 pub struct SvnLog {
