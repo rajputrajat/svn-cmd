@@ -1,7 +1,7 @@
 //! This lib wraps svn command line tool on your system
 #![warn(missing_docs)]
 #![warn(unsafe_code)]
-use std::result::Result;
+use std::{result::Result, sync::Arc};
 
 mod cmd_wrapper;
 mod errors;
@@ -116,7 +116,7 @@ impl SvnCmd {
         SvnLog::new(
             &args,
             target,
-            Box::new(move |a, b, c| SvnCmd::log_fetcher(a, b, c)),
+            Arc::new(move |a, b, c| SvnCmd::log_fetcher(a, b, c)),
         )
     }
 

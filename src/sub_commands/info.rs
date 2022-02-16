@@ -7,7 +7,7 @@ use serde::{
 };
 
 /// Return value of SvnCmd . info()
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct SvnInfo {
     pub entry: InfoEntry,
 }
@@ -24,7 +24,7 @@ impl SvnInfo {
     }
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct InfoEntry {
     #[serde(deserialize_with = "to_pathtype")]
     pub kind: PathType,
@@ -35,7 +35,7 @@ pub struct InfoEntry {
     pub commit: EntryCommit,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct EntryRepository {
     pub root: String,
     pub uuid: String,

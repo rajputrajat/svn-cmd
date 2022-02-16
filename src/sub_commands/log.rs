@@ -1,8 +1,8 @@
 use crate::errors::SvnError;
 use serde::Deserialize;
-use std::collections::VecDeque;
+use std::{collections::VecDeque, sync::Arc};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct RevCount(pub u32);
 #[derive(Debug, Clone, Copy)]
 pub struct StartRev(pub u32);
@@ -10,8 +10,9 @@ pub struct StartRev(pub u32);
 pub struct XmlOut(pub String);
 
 pub(crate) type LogFetcher =
-    Box<dyn Fn(String, String, (RevCount, Option<StartRev>)) -> Result<XmlOut, SvnError>>;
+    Arc<dyn Fn(String, String, (RevCount, Option<StartRev>)) -> Result<XmlOut, SvnError>>;
 
+#[derive(Clone)]
 pub struct SvnLog {
     queue: VecDeque<LogEntry>,
     last_entry_revision: Option<StartRev>,
@@ -55,7 +56,7 @@ pub struct LogParser {
     logentry: Vec<LogEntry>,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct LogEntry {
     revision: u32,
     author: String,
