@@ -59,10 +59,10 @@ pub struct LogParser {
 
 #[derive(Deserialize, Debug, Clone)]
 pub struct LogEntry {
-    revision: u32,
-    author: String,
-    date: String,
-    msg: String,
+    pub revision: u32,
+    pub author: String,
+    pub date: String,
+    pub msg: String,
 }
 
 impl Iterator for SvnLog {
