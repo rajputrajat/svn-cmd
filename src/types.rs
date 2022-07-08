@@ -67,7 +67,7 @@ impl Default for Optionals {
 /// global options to use svn tool
 #[derive(Clone)]
 pub struct LoginOptions {
-    pub credentials: Credentials,
+    pub credentials: Option<Credentials>,
     pub more: Optionals,
 }
 
@@ -75,7 +75,9 @@ impl ToCmdArgs for LoginOptions {
     fn to_cmd_args(&self) -> String {
         format!(
             " {} {} ",
-            self.credentials.to_cmd_args(),
+            self.credentials
+                .as_ref()
+                .map_or_else(|| "".to_owned(), |v| v.to_cmd_args()),
             self.more.to_cmd_args()
         )
     }

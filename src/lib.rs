@@ -39,7 +39,7 @@ pub struct SvnCmdBuilder {}
 
 impl SvnCmd {
     /// create SvnCmd struct
-    pub fn new(creds: Credentials, more: Option<Optionals>) -> SvnCmd {
+    pub fn new(creds: Option<Credentials>, more: Option<Optionals>) -> SvnCmd {
         let options = LoginOptions {
             credentials: creds,
             more: more.unwrap_or_default(),
