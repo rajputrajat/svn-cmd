@@ -12,7 +12,7 @@ pub struct SvnList {
 
 #[derive(Deserialize, Debug, Clone, Default)]
 pub struct ListsList {
-    pub entry: VecDeque<ListEntry>,
+    pub entry: Option<VecDeque<ListEntry>>,
 }
 
 /// SvnList is madeup of these entries
@@ -49,18 +49,12 @@ impl SvnList {
     }
 
     /// returns iterator
-    pub fn iter(&self) -> ListInspector {
-        ListInspector {
-            iter: self.list.entry.iter(),
+    pub fn iter(&self) -> Option<ListInspector> {
+        if let Some(entry) = &self.list.entry {
+            Some(ListInspector { iter: entry.iter() })
+        } else {
+            None
         }
-    }
-}
-
-impl IntoIterator for SvnList {
-    type Item = ListEntry;
-    type IntoIter = std::collections::vec_deque::IntoIter<Self::Item>;
-    fn into_iter(self) -> Self::IntoIter {
-        self.list.entry.into_iter()
     }
 }
 
