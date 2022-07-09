@@ -58,6 +58,7 @@ impl SvnList {
     }
 }
 
+#[derive(Clone)]
 pub struct ListInspector<'a> {
     iter: Iter<'a, ListEntry>,
 }
