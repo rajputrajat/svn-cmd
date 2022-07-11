@@ -8,7 +8,7 @@ pub(crate) trait ToCmdArgs {
 }
 
 /// Credentials
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct Credentials {
     pub username: String,
     pub password: String,
@@ -24,7 +24,7 @@ impl ToCmdArgs for Credentials {
 }
 
 /// optional values
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct Optionals {
     pub cache_auth_tokens: bool,
     pub non_interactive: bool,
@@ -65,7 +65,7 @@ impl Default for Optionals {
 }
 
 /// global options to use svn tool
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct LoginOptions {
     pub credentials: Option<Credentials>,
     pub more: Optionals,

@@ -28,7 +28,7 @@ use crate::{
 use log::trace;
 
 /// Accessor to svn command functionality
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct SvnCmd {
     options: LoginOptions,
     extra_args: String,
