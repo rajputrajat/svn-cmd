@@ -2,7 +2,7 @@
 
 use crate::errors::SvnError;
 use log::trace;
-use std::process::Command;
+use std::{os::windows::process::CommandExt, process::Command};
 
 /// cmd wrapper struct
 pub(crate) struct SvnWrapper {
@@ -24,9 +24,15 @@ impl SvnWrapper {
 
 // private methods
 impl SvnWrapper {
+    const CREATE_NO_WINDOW: u32 = 0x08000000;
+
     pub(crate) fn common_cmd_runner(&self, args: &[&str]) -> Result<String, SvnError> {
         trace!("command args: {:?}", args);
-        match Command::new(&self.cmd).args(args).output() {
+        match Command::new(&self.cmd)
+            .args(args)
+            .creation_flags(Self::CREATE_NO_WINDOW)
+            .output()
+        {
             Ok(o) => {
                 if o.stderr.is_empty() {
                     String::from_utf8(o.stdout).map_err(|e| SvnError::FromUtf8Error { src: e })
