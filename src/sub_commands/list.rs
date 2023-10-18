@@ -5,14 +5,11 @@ use crate::{
 use serde::Deserialize;
 use std::{collections::vec_deque::Iter, collections::VecDeque, fmt::Display};
 
+/// svn list
 #[derive(Deserialize, Debug, Clone, Default)]
 pub struct SvnList {
-    pub list: ListsList,
-}
-
-#[derive(Deserialize, Debug, Clone, Default)]
-pub struct ListsList {
-    pub entry: Option<VecDeque<ListEntry>>,
+    /// the list
+    pub list: VecDeque<ListEntry>,
 }
 
 /// SvnList is madeup of these entries
@@ -40,7 +37,7 @@ impl Display for ListEntry {
 }
 
 /// if this returns `true` list recursively, otherwise skip
-pub type ListFilter = dyn Fn(&str, ListEntry) -> Result<bool, SvnError>;
+//pub type ListFilter = dyn Fn(&str, ListEntry) -> Result<bool, SvnError>;
 
 impl SvnList {
     /// parse XML text
@@ -49,11 +46,9 @@ impl SvnList {
     }
 
     /// returns iterator
-    pub fn iter(&self) -> Option<ListInspector> {
-        if let Some(entry) = &self.list.entry {
-            Some(ListInspector { iter: entry.iter() })
-        } else {
-            None
+    pub fn iter(&self) -> ListInspector {
+        ListInspector {
+            iter: self.list.iter(),
         }
     }
 }

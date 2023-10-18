@@ -12,7 +12,7 @@ pub use crate::{
     errors::SvnError,
     sub_commands::{
         info::{EntryCommit, SvnInfo},
-        list::{ListEntry, ListsList, SvnList},
+        list::{ListEntry, SvnList},
         log::SvnLog,
         status::SvnStatus,
         version::CmdVersion,
@@ -45,11 +45,10 @@ impl SvnCmd {
             more: more.unwrap_or_default(),
         };
         let extra_args = options.to_cmd_args();
-        let cmd = SvnCmd {
+        SvnCmd {
             options,
             extra_args,
-        };
-        cmd
+        }
     }
 
     /// get svn version installed
@@ -113,18 +112,14 @@ impl SvnCmd {
     pub fn log(&self, target: &str) -> Result<SvnLog, SvnError> {
         let mut args = vec!["log", "--xml"];
         args.push(&self.extra_args);
-        SvnLog::new(
-            &args,
-            target,
-            Arc::new(move |a, b, c| SvnCmd::log_fetcher(a, b, c)),
-        )
+        SvnLog::new(&args, target, Arc::new(SvnCmd::log_fetcher))
     }
 
     /// SVN STATUS command: svn path status
     /// `svn status PATH`
     pub fn status(&self, target: &str) -> Result<SvnStatus, SvnError> {
         let out = self.get_cmd_out(&["status", "--xml", target])?;
-        SvnStatus::parse(&out)
+        SvnStatus::parse(out)
     }
 
     /// SVN INFO command: read svn info
@@ -179,7 +174,7 @@ impl SvnCmd {
     /// SVN <raw> command: run a raw command
     /// `svn <raw_cmd>
     pub fn raw_cmd(&self, cmd: String) -> Result<String, SvnError> {
-        let args: Vec<&str> = cmd.split_whitespace().into_iter().collect();
+        let args: Vec<&str> = cmd.split_whitespace().collect();
         self.get_cmd_out(&args)
     }
 }
@@ -191,7 +186,6 @@ impl SvnCmd {
         all_args.extend_from_slice(args);
         self.extra_args
             .split_whitespace()
-            .into_iter()
             .for_each(|s| all_args.push(s));
         SvnWrapper::new().common_cmd_runner(&all_args)
     }

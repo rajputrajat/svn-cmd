@@ -1,6 +1,6 @@
 use crate::errors::SvnError;
 use serde::Deserialize;
-use std::{collections::VecDeque, sync::Arc};
+use std::{collections::VecDeque, fmt::Write, sync::Arc};
 
 #[derive(Debug, Clone)]
 pub struct RevCount(pub u32);
@@ -27,7 +27,11 @@ impl SvnLog {
         let mut logger = Self {
             queue: VecDeque::new(),
             last_entry_revision: None,
-            args: args.iter().map(|s| format!(" {} ", s)).collect(),
+            //args: args.iter().map(|s| format!(" {} ", s)).collect(),
+            args: args.iter().try_fold(String::new(), |mut acc, &s| {
+                write!(&mut acc, " {} ", s).unwrap();
+                Ok(acc)
+            })?,
             target: target.to_owned(),
             fetcher,
         };
