@@ -2,6 +2,7 @@ use crate::{
     errors::SvnError, sub_commands::info::to_pathtype, sub_commands::info::EntryCommit,
     types::PathType,
 };
+use log::trace;
 use serde::Deserialize;
 use std::{collections::vec_deque::Iter, collections::VecDeque, fmt::Display};
 
@@ -42,7 +43,10 @@ impl Display for ListEntry {
 impl SvnList {
     /// parse XML text
     pub(crate) fn parse(xml_text: &str) -> Result<Self, SvnError> {
-        serde_xml_rs::from_str::<Self>(xml_text).map_err(|e| SvnError::Deserializer { src: e })
+        serde_xml_rs::from_str::<Self>(xml_text).map_err(|e| {
+            trace!("serde_xml_rs parsing error '{e:?}'");
+            SvnError::Deserializer { src: e }
+        })
     }
 
     /// returns iterator

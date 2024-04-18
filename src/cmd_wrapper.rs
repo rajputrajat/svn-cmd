@@ -35,7 +35,11 @@ impl SvnWrapper {
         {
             Ok(o) => {
                 if o.stderr.is_empty() {
-                    String::from_utf8(o.stdout).map_err(|e| SvnError::FromUtf8Error { src: e })
+                    trace!("svn cmd output: '{:?}'", o.stdout);
+                    String::from_utf8(o.stdout).map_err(|e| {
+                        trace!("invalid utf8 output of svn cmd '{:?} {args:?}'", self.cmd,);
+                        SvnError::FromUtf8Error { src: e }
+                    })
                 } else {
                     Err(SvnError::Other(format!(
                         "some error while running svn command: {:?}",
