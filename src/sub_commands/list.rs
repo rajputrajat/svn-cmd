@@ -75,6 +75,12 @@ mod tests {
     use super::*;
 
     #[test]
+    fn parsing_() {
+        let xml_text: SvnList = serde_xml_rs::from_str(LIST_XML_3.trim()).unwrap();
+        println!("{:?}", xml_text);
+    }
+
+    #[test]
     fn parsing() {
         for list_xml in [LIST_XML_1, LIST_XML_2] {
             let xml_text = SvnList::parse(list_xml).unwrap();
@@ -85,8 +91,8 @@ mod tests {
 
     #[test]
     fn list_iter() {
-        for list_xml in [LIST_XML_1, LIST_XML_2] {
-            let mut list = SvnList::parse(list_xml).unwrap();
+        for list_xml in [LIST_XML_1, LIST_XML_2, LIST_XML_3] {
+            let list = SvnList::parse(list_xml).unwrap();
             (0..10).for_each(|_| {
                 println!("{:?}\n", list.iter().next());
             });
@@ -400,6 +406,24 @@ mod tests {
    revision="386704">
 <author>sa102001</author>
 <date>2024-03-26T03:12:16.268312Z</date>
+</commit>
+</entry>
+</list>
+</lists>
+    "##;
+
+    const LIST_XML_3: &str = r##"
+<?xml version="1.0" encoding="UTF-8"?>
+<lists>
+<list>
+<entry
+   kind="file">
+<name>BaoZhuZhaoFu_PurpleCelebration.vcproj</name>
+<size>20617</size>
+<commit
+   revision="373439">
+<author>sa102001</author>
+<date>2023-07-21T05:31:45.995541Z</date>
 </commit>
 </entry>
 </list>
