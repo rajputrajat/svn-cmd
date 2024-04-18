@@ -43,7 +43,7 @@ impl Display for ListEntry {
 impl SvnList {
     /// parse XML text
     pub(crate) fn parse(xml_text: &str) -> Result<Self, SvnError> {
-        serde_xml_rs::from_str::<Self>(xml_text).map_err(|e| {
+        serde_xml_rs::from_str::<Self>(xml_text.trim()).map_err(|e| {
             trace!("serde_xml_rs parsing error '{e:?}'");
             SvnError::Deserializer { src: e }
         })
@@ -76,21 +76,25 @@ mod tests {
 
     #[test]
     fn parsing() {
-        let xml_text = SvnList::parse(LIST_XML).unwrap();
-        println!("{:?}", xml_text);
-        assert!(false);
+        for list_xml in [LIST_XML_1, LIST_XML_2] {
+            let xml_text = SvnList::parse(list_xml).unwrap();
+            println!("{:?}", xml_text);
+            assert!(false);
+        }
     }
 
     #[test]
     fn list_iter() {
-        let mut list = SvnList::parse(LIST_XML).unwrap();
-        (0..10).for_each(|_| {
-            println!("{:?}\n", list.iter().next());
-        });
-        assert!(false);
+        for list_xml in [LIST_XML_1, LIST_XML_2] {
+            let mut list = SvnList::parse(list_xml).unwrap();
+            (0..10).for_each(|_| {
+                println!("{:?}\n", list.iter().next());
+            });
+            assert!(false);
+        }
     }
 
-    const LIST_XML: &str = r##"
+    const LIST_XML_1: &str = r##"
 <?xml version="1.0" encoding="UTF-8"?>
 <lists>
 <list
@@ -270,6 +274,132 @@ mod tests {
    revision="322533">
 <author>rajput</author>
 <date>2021-07-22T05:46:30.580142Z</date>
+</commit>
+</entry>
+</list>
+</lists>
+    "##;
+
+    const LIST_XML_2: &str = r##"
+<?xml version="1.0" encoding="UTF-8"?>
+<lists>
+<list
+   path="https://svn.ali.global/GDK_games/GDK_games/BLS/CDS/BonusBoostBaoZhuZhaoFu/PurpleCelebration/branches/devline_sagrawal/source">
+<entry
+   kind="file">
+<name>BaoZhuZhaoFu_PurpleCelebration.vcproj</name>
+<size>20617</size>
+<commit
+   revision="373439">
+<author>sa102001</author>
+<date>2023-07-21T05:31:45.995541Z</date>
+</commit>
+</entry>
+<entry
+   kind="file">
+<name>BaoZhuZhaoFu_PurpleCelebration.vcxproj</name>
+<size>27302</size>
+<commit
+   revision="373685">
+<author>sa102001</author>
+<date>2023-07-25T10:21:50.950544Z</date>
+</commit>
+</entry>
+<entry
+   kind="file">
+<name>BaoZhuZhaoFu_PurpleCelebration.vcxproj.filters</name>
+<size>21408</size>
+<commit
+   revision="373439">
+<author>sa102001</author>
+<date>2023-07-21T05:31:45.995541Z</date>
+</commit>
+</entry>
+<entry
+   kind="file">
+<name>BaoZhuZhaoFu_PurpleCelebration.vcxproj.user</name>
+<size>758</size>
+<commit
+   revision="373439">
+<author>sa102001</author>
+<date>2023-07-21T05:31:45.995541Z</date>
+</commit>
+</entry>
+<entry
+   kind="file">
+<name>Jurisdiction.makefile</name>
+<size>1248</size>
+<commit
+   revision="373439">
+<author>sa102001</author>
+<date>2023-07-21T05:31:45.995541Z</date>
+</commit>
+</entry>
+<entry
+   kind="file">
+<name>Makefile.in</name>
+<size>420</size>
+<commit
+   revision="373439">
+<author>sa102001</author>
+<date>2023-07-21T05:31:45.995541Z</date>
+</commit>
+</entry>
+<entry
+   kind="file">
+<name>ReadMe.txt</name>
+<size>15414</size>
+<commit
+   revision="373439">
+<author>sa102001</author>
+<date>2023-07-21T05:31:45.995541Z</date>
+</commit>
+</entry>
+<entry
+   kind="dir">
+<name>assets</name>
+<commit
+   revision="382999">
+<author>sa102001</author>
+<date>2024-01-23T09:48:16.976029Z</date>
+</commit>
+</entry>
+<entry
+   kind="file">
+<name>configure</name>
+<size>1542</size>
+<commit
+   revision="373439">
+<author>sa102001</author>
+<date>2023-07-21T05:31:45.995541Z</date>
+</commit>
+</entry>
+<entry
+   kind="dir">
+<name>libs</name>
+<commit
+   revision="373439">
+<author>sa102001</author>
+<date>2023-07-21T05:31:45.995541Z</date>
+</commit>
+</entry>
+<entry
+   kind="file">
+<name>manifest</name>
+<size>14107</size>
+<commit
+   revision="373439">
+<author>sa102001</author>
+<date>2023-07-21T05:31:45.995541Z</date>
+</commit>
+</entry>
+<entry
+   kind="dir">
+<name>src</name>
+<commit
+   revision="386704">
+<author>sa102001</author>
+<date>2024-03-26T03:12:16.268312Z</date>
 </commit>
 </entry>
 </list>

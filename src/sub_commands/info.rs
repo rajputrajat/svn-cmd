@@ -7,14 +7,14 @@ use serde::{
 };
 
 /// Return value of SvnCmd . info()
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, Deserialize, Clone, PartialEq)]
 pub struct SvnInfo {
     pub entry: InfoEntry,
 }
 
 impl SvnInfo {
     pub(crate) fn parse(xml: &str) -> Result<Self, SvnError> {
-        match serde_xml_rs::from_str::<SvnInfo>(xml) {
+        match serde_xml_rs::from_str::<SvnInfo>(xml.trim()) {
             Ok(v) => {
                 trace!("{:?}", v);
                 Ok(v)
@@ -24,7 +24,7 @@ impl SvnInfo {
     }
 }
 
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, Deserialize, Clone, PartialEq)]
 pub struct InfoEntry {
     #[serde(deserialize_with = "to_pathtype")]
     pub kind: PathType,
@@ -35,7 +35,7 @@ pub struct InfoEntry {
     pub commit: EntryCommit,
 }
 
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, Deserialize, Clone, PartialEq)]
 pub struct EntryRepository {
     pub root: String,
     pub uuid: String,
@@ -68,8 +68,7 @@ mod tests {
 
     #[test]
     fn sample_xml_data() {
-        const XML: &str = r##"
-<?xml version="1.0" encoding="UTF-8"?>
+        const XML: &str = r##"<?xml version="1.0" encoding="UTF-8"?>
 <info>
     <entry path="." revision="324270" kind="dir">
         <url>https://svn.ali.global/GDK_games/GDK_games/BLS/HHR/BuffaloDeluxe/trunk/source</url>
@@ -89,8 +88,25 @@ mod tests {
         </commit>
     </entry>
 </info>"##;
-        let info = SvnInfo::parse(XML);
+
+        let info = SvnInfo::parse(XML).unwrap();
         println!("{:#?}", info);
-        assert_eq!(1, 0);
+        assert_eq!(info, SvnInfo {
+                entry: InfoEntry {
+                    kind: PathType::Dir,
+                    url: "https://svn.ali.global/GDK_games/GDK_games/BLS/HHR/BuffaloDeluxe/trunk/source".to_owned(),
+                    relative_url: "^/GDK_games/BLS/HHR/BuffaloDeluxe/trunk/source".to_owned(),
+                    repository: EntryRepository {
+                        root: "https://svn.ali.global/GDK_games".to_owned(),
+                        uuid: "e0c53376-34c8-4e4f-a567-4bb579746d60".to_owned(),
+                    },
+                    commit: EntryCommit {
+                        revision: 324270,
+                        author: "rajput".to_owned(),
+                        date: "2021-08-16T15:02:49.091280Z".to_owned(),
+                    },
+                },
+            },
+        );
     }
 }

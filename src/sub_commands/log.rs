@@ -82,22 +82,22 @@ impl Iterator for SvnLog {
 
 impl LogParser {
     fn parse(text: &str) -> Result<Self, SvnError> {
-        serde_xml_rs::from_str::<Self>(text).map_err(|e| SvnError::Deserializer { src: e })
+        serde_xml_rs::from_str::<Self>(text.trim()).map_err(|e| SvnError::Deserializer { src: e })
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    #[test]
-    fn fetch_logs() {
-        let mut sl: SvnLog =
-            SvnLog::new("https://svn.ali.global/GDK_games/GDK_games/BLS/NYL/").unwrap();
-        (0..40).for_each(|_| {
-            println!("{:?}\n", sl.next());
-        });
-        assert!(false);
-    }
+    // #[test]
+    // fn fetch_logs() {
+    //     let mut sl: SvnLog =
+    //         SvnLog::new("https://svn.ali.global/GDK_games/GDK_games/BLS/NYL/").unwrap();
+    //     (0..40).for_each(|_| {
+    //         println!("{:?}\n", sl.next());
+    //     });
+    //     assert!(false);
+    // }
 
     #[test]
     fn parse() {

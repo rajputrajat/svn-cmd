@@ -36,7 +36,7 @@ pub struct SvnStatus {
 
 impl SvnStatus {
     pub(crate) fn parse<T: AsRef<str>>(text: T) -> Result<Self, SvnError> {
-        let status_vec = StatusParser::parse(text.as_ref())?;
+        let status_vec = StatusParser::parse(text.as_ref().trim())?;
         let mut status_map: HashMap<StatusItemType, Vec<PathBuf>> = HashMap::new();
         for entry in status_vec.target.entry {
             let item = entry.wc_status.item;
@@ -115,7 +115,7 @@ mod tests {
         assert!(false);
     }
 
-    const SVN_STATUS: &str = r##" <?xml version="1.0" encoding="UTF-8"?>
+    const SVN_STATUS: &str = r##"<?xml version="1.0" encoding="UTF-8"?>
 <status>
     <target path=".">
         <entry path="GDK\GDKBase">
