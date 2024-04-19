@@ -19,3 +19,11 @@ url = "2.2.2"
 
 [dev-dependencies]
 env_logger = "^0.8"
+bugsalot = "0.2.2"
+
+[[example]]
+name = "xml_parsing"
+required-features = ["attach_debugger"]
+
+[features]
+attach_debugger = []
