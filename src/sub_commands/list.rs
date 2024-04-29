@@ -10,7 +10,12 @@ use std::{collections::vec_deque::Iter, collections::VecDeque, fmt::Display};
 #[derive(Deserialize, Debug, Clone, Default)]
 pub struct SvnList {
     /// the list
-    pub list: VecDeque<ListEntry>,
+    pub list: Entry,
+}
+
+#[derive(Deserialize, Debug, Clone, Default)]
+pub struct Entry {
+    pub entry: VecDeque<ListEntry>,
 }
 
 /// SvnList is madeup of these entries
@@ -52,7 +57,7 @@ impl SvnList {
     /// returns iterator
     pub fn iter(&self) -> ListInspector {
         ListInspector {
-            iter: self.list.iter(),
+            iter: self.list.entry.iter(),
         }
     }
 }
