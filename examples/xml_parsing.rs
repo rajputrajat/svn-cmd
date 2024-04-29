@@ -11,8 +11,7 @@ fn main() {
     println!("{:?}", xml_text);
 }
 
-const LIST_XML: &str = r##"
-<?xml version="1.0" encoding="UTF-8"?>
+const LIST_XML: &str = r##"<?xml version="1.0" encoding="UTF-8"?>
 <lists>
 <list>
 <entry
@@ -26,5 +25,4 @@ const LIST_XML: &str = r##"
 </commit>
 </entry>
 </list>
-</lists>
-    "##;
+</lists>"##;
