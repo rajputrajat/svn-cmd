@@ -16,6 +16,7 @@ which = "^4.2"
 semver = "^1.0"
 regex = "^1.5"
 url = "2.2.2"
+simple-broadcaster = { git = "https://github.com/rajputrajat/simple-broadcaster"}
 
 [dev-dependencies]
 env_logger = "^0.8"
