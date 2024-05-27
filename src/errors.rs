@@ -34,6 +34,10 @@ pub enum SvnError {
     #[error("current dir is not working dir")]
     NotWorkingDir,
 
+    /// errors from the crate 'managed-command'
+    #[error(transparent)]
+    ManagedCommandError(#[from] managed_command::Error),
+
     /// other error
     #[error("other error: `{0}`")]
     Other(String),
