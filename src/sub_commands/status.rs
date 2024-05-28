@@ -29,8 +29,10 @@ impl StatusItemType {
     }
 }
 
+/// represents output of svn-status command
 #[derive(Debug)]
 pub struct SvnStatus {
+    /// status data
     pub status: HashMap<StatusItemType, Vec<PathBuf>>,
 }
 
@@ -64,7 +66,7 @@ impl StatusParser {
                 trace!("{:?}", v);
                 Ok(v)
             }
-            Err(e) => Err(SvnError::Deserializer { src: e }),
+            Err(e) => Err(SvnError::Deserializer(e)),
         }
     }
 }
@@ -112,7 +114,6 @@ mod tests {
     fn status() {
         let de = SvnStatus::parse(SVN_STATUS).unwrap();
         println!("{:#?}", de);
-        assert!(false);
     }
 
     const SVN_STATUS: &str = r##"<?xml version="1.0" encoding="UTF-8"?>

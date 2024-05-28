@@ -13,6 +13,7 @@ pub(crate) type LogFetcher = Arc<
     dyn Fn(String, String, (RevCount, Option<StartRev>)) -> Result<XmlOut, SvnError> + Send + Sync,
 >;
 
+/// represents svn log
 #[derive(Clone)]
 pub struct SvnLog {
     queue: VecDeque<LogEntry>,
@@ -82,7 +83,7 @@ impl Iterator for SvnLog {
 
 impl LogParser {
     fn parse(text: &str) -> Result<Self, SvnError> {
-        serde_xml_rs::from_str::<Self>(text.trim()).map_err(|e| SvnError::Deserializer { src: e })
+        serde_xml_rs::from_str::<Self>(text.trim()).map_err(SvnError::Deserializer)
     }
 }
 
@@ -101,9 +102,8 @@ mod tests {
 
     #[test]
     fn parse() {
-        let de = serde_xml_rs::from_str::<LogParser>(&LOG_SAMPLE).unwrap();
+        let de = serde_xml_rs::from_str::<LogParser>(LOG_SAMPLE).unwrap();
         println!("{:?}", de);
-        assert!(false);
     }
 
     const LOG_SAMPLE: &str = r##"

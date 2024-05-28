@@ -11,16 +11,16 @@ pub enum SvnError {
     Disconnection,
 
     /// Svn utility isn't installed
-    #[error("command line svn tool isn't installed or not added in PATH env: {src:?}")]
-    MissingSvnCli { src: io::Error },
+    #[error(transparent)]
+    MissingSvnCli(#[from] io::Error),
 
     /// invalid UTF8 output
-    #[error("invalid utf8 output: {src:?}")]
-    FromUtf8Error { src: FromUtf8Error },
+    #[error(transparent)]
+    FromUtf8Error(#[from] FromUtf8Error),
 
     /// invalid UTF8 output
-    #[error("error while deserializing: {src:?}")]
-    Deserializer { src: serde_xml_rs::Error },
+    #[error(transparent)]
+    Deserializer(#[from] serde_xml_rs::Error),
 
     /// requested path doesn't exist
     #[error("requested path doesn't exist")]

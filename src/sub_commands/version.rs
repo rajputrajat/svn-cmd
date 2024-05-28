@@ -7,6 +7,7 @@ use std::path::PathBuf;
 #[derive(Debug, PartialEq)]
 pub struct RevisionNumber(u32);
 
+/// represents output of 'svn version'
 #[derive(Debug, PartialEq)]
 pub struct CmdVersion {
     cmd_path: PathBuf,

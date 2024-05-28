@@ -9,6 +9,7 @@ use serde::{
 /// Return value of SvnCmd . info()
 #[derive(Debug, Deserialize, Clone, PartialEq)]
 pub struct SvnInfo {
+    /// entry field from svn xml
     pub entry: InfoEntry,
 }
 
@@ -19,7 +20,7 @@ impl SvnInfo {
                 trace!("{:?}", v);
                 Ok(v)
             }
-            Err(e) => Err(SvnError::Deserializer { src: e }),
+            Err(e) => Err(SvnError::Deserializer(e)),
         }
     }
 }
@@ -41,10 +42,14 @@ pub struct EntryRepository {
     pub uuid: String,
 }
 
+/// commit entry
 #[derive(Debug, Deserialize, Clone, PartialEq)]
 pub struct EntryCommit {
+    /// revision number
     pub revision: u32,
+    /// author name
     pub author: String,
+    /// date of commit
     pub date: String,
 }
 

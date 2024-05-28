@@ -50,7 +50,7 @@ impl SvnList {
     pub(crate) fn parse(xml_text: &str) -> Result<Self, SvnError> {
         serde_xml_rs::from_str::<Self>(xml_text.trim()).map_err(|e| {
             trace!("serde_xml_rs parsing error '{e:?}'");
-            SvnError::Deserializer { src: e }
+            SvnError::Deserializer(e)
         })
     }
 
@@ -90,7 +90,6 @@ mod tests {
         for list_xml in [LIST_XML_1, LIST_XML_2] {
             let xml_text = SvnList::parse(list_xml).unwrap();
             println!("{:?}", xml_text);
-            assert!(false);
         }
     }
 
@@ -101,7 +100,6 @@ mod tests {
             (0..10).for_each(|_| {
                 println!("{:?}\n", list.iter().next());
             });
-            assert!(false);
         }
     }
 

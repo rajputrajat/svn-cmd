@@ -9,6 +9,7 @@ mod sub_commands;
 mod types;
 
 pub use crate::{
+    cmd_wrapper::{StderrFuture, StdoutFuture},
     errors::SvnError,
     sub_commands::{
         info::{EntryCommit, SvnInfo},
@@ -30,6 +31,7 @@ use log::trace;
 /// Accessor to svn command functionality
 #[derive(Debug, Clone)]
 pub struct SvnCmd {
+    #[allow(dead_code)]
     options: LoginOptions,
     extra_args: String,
 }

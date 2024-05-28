@@ -19,14 +19,16 @@ impl SvnWrapper {
         }
     }
 
-    pub(crate) fn from_cmd<T: Into<String>>(cmd: T) -> Self {
-        Self { cmd: cmd.into() }
-    }
+    // pub(crate) fn from_cmd<T: Into<String>>(cmd: T) -> Self {
+    //     Self { cmd: cmd.into() }
+    // }
 }
 
+/// This wraps in rr_common_utils::Future<String> for stdout
 #[derive(Debug)]
 pub struct StdoutFuture(pub Future<String>);
 
+/// This wraps in rr_common_utils::Future<String> for stderr
 #[derive(Debug)]
 pub struct StderrFuture(pub Future<String>);
 
@@ -45,7 +47,7 @@ impl SvnWrapper {
                 if o.stderr.is_empty() {
                     String::from_utf8(o.stdout).map_err(|e| {
                         trace!("invalid utf8 output of svn cmd '{:?} {args:?}'", self.cmd,);
-                        SvnError::FromUtf8Error { src: e }
+                        SvnError::FromUtf8Error(e)
                     })
                 } else {
                     Err(SvnError::Other(format!(
@@ -57,10 +59,11 @@ impl SvnWrapper {
                     )))
                 }
             }
-            Err(e) => Err(SvnError::MissingSvnCli { src: e }),
+            Err(e) => Err(SvnError::MissingSvnCli(e)),
         }
     }
 
+    #[allow(dead_code)]
     pub(crate) fn common_cmd_runner_cancellable(
         &self,
         args: &[&str],
