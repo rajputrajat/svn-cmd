@@ -17,6 +17,7 @@ semver = "1"
 regex = "1"
 url = "2"
 managed-command = { git = "https://github.com/rajputrajat/managed-command" }
+rr-common-utils = { git = "https://github.com/rajputrajat/rr-common-utils" }
 
 [dev-dependencies]
 env_logger = "^0.8"

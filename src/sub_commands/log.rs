@@ -30,7 +30,7 @@ impl SvnLog {
             //args: args.iter().map(|s| format!(" {} ", s)).collect(),
             args: args.iter().try_fold(String::new(), |mut acc, &s| {
                 write!(&mut acc, " {} ", s).unwrap();
-                Ok(acc)
+                Ok::<String, SvnError>(acc)
             })?,
             target: target.to_owned(),
             fetcher,
