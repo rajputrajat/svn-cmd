@@ -27,6 +27,7 @@ use crate::{
     types::ToCmdArgs,
 };
 use log::trace;
+use managed_command::Canceller;
 
 /// Accessor to svn command functionality
 #[derive(Debug, Clone)]
@@ -66,6 +67,22 @@ impl SvnCmd {
             args.push("--recursive");
         }
         let xml_text = self.get_cmd_out(&args)?;
+        trace!("{}", xml_text);
+        SvnList::parse(&xml_text)
+    }
+
+    /// get list of files
+    pub fn list_cancellable(
+        &self,
+        target: &str,
+        recursive: bool,
+        canceller: Canceller,
+    ) -> Result<SvnList, SvnError> {
+        let mut args = vec!["list", "--xml", target];
+        if recursive {
+            args.push("--recursive");
+        }
+        let (xml_text_future, err_text_future) = self.get_cmd_out_cancellable(&args, canceller)?;
         trace!("{}", xml_text);
         SvnList::parse(&xml_text)
     }
@@ -190,6 +207,19 @@ impl SvnCmd {
             .split_whitespace()
             .for_each(|s| all_args.push(s));
         SvnWrapper::new().common_cmd_runner(&all_args)
+    }
+
+    fn get_cmd_out_cancellable(
+        &self,
+        args: &[&str],
+        canceller: Canceller,
+    ) -> Result<(StdoutFuture, StderrFuture), SvnError> {
+        let mut all_args: Vec<&str> = Vec::new();
+        all_args.extend_from_slice(args);
+        self.extra_args
+            .split_whitespace()
+            .for_each(|s| all_args.push(s));
+        SvnWrapper::new().common_cmd_runner_cancellable(&all_args, canceller)
     }
 
     fn log_fetcher(
