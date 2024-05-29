@@ -28,6 +28,7 @@ use crate::{
 };
 use log::trace;
 use managed_command::Canceller;
+use rr_common_utils::Future;
 
 /// Accessor to svn command functionality
 #[derive(Debug, Clone)]
@@ -77,14 +78,18 @@ impl SvnCmd {
         target: &str,
         recursive: bool,
         canceller: Canceller,
-    ) -> Result<SvnList, SvnError> {
+    ) -> Result<(Future<Result<SvnList, SvnError>>, StderrFuture), SvnError> {
         let mut args = vec!["list", "--xml", target];
         if recursive {
             args.push("--recursive");
         }
         let (xml_text_future, err_text_future) = self.get_cmd_out_cancellable(&args, canceller)?;
-        trace!("{}", xml_text);
-        SvnList::parse(&xml_text)
+        Ok((
+            xml_text_future
+                .0
+                .try_map(|xml_text| SvnList::parse(&xml_text)),
+            err_text_future,
+        ))
     }
 
     /// get list of files
@@ -100,6 +105,15 @@ impl SvnCmd {
     /// read file content
     pub fn cat(&self, target: &str) -> Result<String, SvnError> {
         self.get_cmd_out(&["cat", target])
+    }
+
+    /// read file content
+    pub fn cat_cancellable(
+        &self,
+        target: &str,
+        canceller: Canceller,
+    ) -> Result<(StdoutFuture, StderrFuture), SvnError> {
+        self.get_cmd_out_cancellable(&["cat", target], canceller)
     }
 
     /// SVN ADD command to add new files to stage for commit operation
