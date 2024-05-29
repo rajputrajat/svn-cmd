@@ -1,7 +1,6 @@
 //! This lib wraps svn command line tool on your system
 #![warn(missing_docs)]
 #![warn(unsafe_code)]
-use std::{result::Result, sync::Arc};
 
 mod cmd_wrapper;
 mod errors;
@@ -27,8 +26,9 @@ use crate::{
     types::ToCmdArgs,
 };
 use log::trace;
-use managed_command::Canceller;
 use rr_common_utils::Future;
+use simple_broadcaster::Canceller;
+use std::{result::Result, sync::Arc};
 
 /// Accessor to svn command functionality
 #[derive(Debug, Clone)]
