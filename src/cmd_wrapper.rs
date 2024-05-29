@@ -2,8 +2,9 @@
 
 use crate::errors::SvnError;
 use log::trace;
-use managed_command::{Canceller, Command as ManagedCommand};
+use managed_command::Command as ManagedCommand;
 use rr_common_utils::{Future, ThreadPool};
+use simple_broadcaster::Canceller;
 use std::{os::windows::process::CommandExt, process::Command};
 
 /// cmd wrapper struct

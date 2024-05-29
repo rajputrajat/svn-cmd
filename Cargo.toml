@@ -16,6 +16,7 @@ which = "4"
 semver = "1"
 regex = "1"
 url = "2"
+simple-broadcaster = { git = "https://github.com/rajputrajat/simple-broadcaster" }
 managed-command = { git = "https://github.com/rajputrajat/managed-command" }
 rr-common-utils = { git = "https://github.com/rajputrajat/rr-common-utils" }
 
