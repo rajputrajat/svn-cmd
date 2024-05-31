@@ -5,7 +5,7 @@ use log::trace;
 use managed_command::Command as ManagedCommand;
 use rr_common_utils::{Future, JobDesc, ThreadPool};
 use simple_broadcaster::{Canceller, CloneAs};
-use std::{os::windows::process::CommandExt, process::Command, sync::Arc};
+use std::{os::windows::process::CommandExt, process::Command};
 
 /// cmd wrapper struct
 pub(crate) struct SvnWrapper {
@@ -23,15 +23,6 @@ impl SvnWrapper {
     // pub(crate) fn from_cmd<T: Into<String>>(cmd: T) -> Self {
     //     Self { cmd: cmd.into() }
     // }
-}
-
-/// Runner context
-#[derive(Debug, Clone)]
-pub struct RunnerContext {
-    /// ThreadPool to use thread from
-    pub pool: Arc<ThreadPool>,
-    /// command run canceller
-    pub canceller: Canceller,
 }
 
 /// This wraps in rr_common_utils::Future<String> for stdout
@@ -77,16 +68,15 @@ impl SvnWrapper {
     pub(crate) fn common_cmd_runner_cancellable(
         &self,
         args: &[&str],
-        runner_context: &RunnerContext,
+        canceller: Canceller,
     ) -> Result<(StdoutFuture, StderrFuture), SvnError> {
         trace!("command args: {:?}", args);
         let mut cmd = Command::new(&self.cmd);
         cmd.args(args);
         cmd.creation_flags(Self::CREATE_NO_WINDOW);
         let mut cmd: ManagedCommand = cmd.into();
-        let (_stdin, stdout, stderr) =
-            cmd.run(runner_context.canceller.clone_as(format!("run: {args:?}")))?;
-        let stderr_future = StderrFuture(runner_context.pool.run_async(
+        let (_stdin, stdout, stderr) = cmd.run(canceller.clone_as(format!("run: {args:?}")))?;
+        let stderr_future = StderrFuture(ThreadPool::global().run_async(
             move || {
                 let mut out = String::new();
                 while let Ok(stderr_str) = stderr.recv() {
@@ -99,7 +89,7 @@ impl SvnWrapper {
                 "capturing the stderr of svn cmd '{args}'",
             ),
         ));
-        let stdout_future = StdoutFuture(runner_context.pool.run_async(
+        let stdout_future = StdoutFuture(ThreadPool::global().run_async(
             move || {
                 let mut out = String::new();
                 while let Ok(stdout_str) = stdout.recv() {

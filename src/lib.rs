@@ -8,7 +8,7 @@ mod sub_commands;
 mod types;
 
 pub use crate::{
-    cmd_wrapper::{RunnerContext, StderrFuture, StdoutFuture},
+    cmd_wrapper::{StderrFuture, StdoutFuture},
     errors::SvnError,
     sub_commands::{
         info::{EntryCommit, SvnInfo},
@@ -27,6 +27,7 @@ use crate::{
 };
 use log::trace;
 use rr_common_utils::{Future, JobDesc};
+use simple_broadcaster::Canceller;
 use std::{result::Result, sync::Arc};
 
 /// Accessor to svn command functionality
@@ -76,14 +77,13 @@ impl SvnCmd {
         &self,
         target: &str,
         recursive: bool,
-        runner_context: &RunnerContext,
+        canceller: Canceller,
     ) -> Result<(Future<Result<SvnList, SvnError>>, StderrFuture), SvnError> {
         let mut args = vec!["list", "--xml", target];
         if recursive {
             args.push("--recursive");
         }
-        let (xml_text_future, err_text_future) =
-            self.get_cmd_out_cancellable(&args, runner_context)?;
+        let (xml_text_future, err_text_future) = self.get_cmd_out_cancellable(&args, canceller)?;
         Ok((
             xml_text_future.0.try_map(
                 |xml_text| SvnList::parse(&xml_text),
@@ -112,9 +112,9 @@ impl SvnCmd {
     pub fn cat_cancellable(
         &self,
         target: &str,
-        runner_context: &RunnerContext,
+        canceller: Canceller,
     ) -> Result<(StdoutFuture, StderrFuture), SvnError> {
-        self.get_cmd_out_cancellable(&["cat", target], runner_context)
+        self.get_cmd_out_cancellable(&["cat", target], canceller)
     }
 
     /// SVN ADD command to add new files to stage for commit operation
@@ -227,14 +227,14 @@ impl SvnCmd {
     fn get_cmd_out_cancellable(
         &self,
         args: &[&str],
-        runner_context: &RunnerContext,
+        canceller: Canceller,
     ) -> Result<(StdoutFuture, StderrFuture), SvnError> {
         let mut all_args: Vec<&str> = Vec::new();
         all_args.extend_from_slice(args);
         self.extra_args
             .split_whitespace()
             .for_each(|s| all_args.push(s));
-        SvnWrapper::new().common_cmd_runner_cancellable(&all_args, runner_context)
+        SvnWrapper::new().common_cmd_runner_cancellable(&all_args, canceller)
     }
 
     fn log_fetcher(
