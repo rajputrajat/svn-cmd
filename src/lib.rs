@@ -26,7 +26,7 @@ use crate::{
     types::ToCmdArgs,
 };
 use log::trace;
-use rr_common_utils::Future;
+use rr_common_utils::{Future, JobDesc};
 use std::{result::Result, sync::Arc};
 
 /// Accessor to svn command functionality
@@ -85,9 +85,10 @@ impl SvnCmd {
         let (xml_text_future, err_text_future) =
             self.get_cmd_out_cancellable(&args, runner_context)?;
         Ok((
-            xml_text_future
-                .0
-                .try_map(|xml_text| SvnList::parse(&xml_text)),
+            xml_text_future.0.try_map(
+                |xml_text| SvnList::parse(&xml_text),
+                JobDesc::create("list_cancellable", "parse the output of svn-list"),
+            ),
             err_text_future,
         ))
     }

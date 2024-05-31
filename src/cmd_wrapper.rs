@@ -3,7 +3,7 @@
 use crate::errors::SvnError;
 use log::trace;
 use managed_command::Command as ManagedCommand;
-use rr_common_utils::{Future, ThreadPool};
+use rr_common_utils::{Future, JobDesc, ThreadPool};
 use simple_broadcaster::{Canceller, CloneAs};
 use std::{os::windows::process::CommandExt, process::Command, sync::Arc};
 
@@ -86,20 +86,32 @@ impl SvnWrapper {
         let mut cmd: ManagedCommand = cmd.into();
         let (_stdin, stdout, stderr) =
             cmd.run(runner_context.canceller.clone_as(format!("run: {args:?}")))?;
-        let stderr_future = StderrFuture(runner_context.pool.run_async(move || {
-            let mut out = String::new();
-            while let Ok(stderr_str) = stderr.recv() {
-                out.push_str(stderr_str.as_str());
-            }
-            out
-        }));
-        let stdout_future = StdoutFuture(runner_context.pool.run_async(move || {
-            let mut out = String::new();
-            while let Ok(stdout_str) = stdout.recv() {
-                out.push_str(stdout_str.as_str());
-            }
-            out
-        }));
+        let stderr_future = StderrFuture(runner_context.pool.run_async(
+            move || {
+                let mut out = String::new();
+                while let Ok(stderr_str) = stderr.recv() {
+                    out.push_str(stderr_str.as_str());
+                }
+                out
+            },
+            JobDesc::create(
+                "common_cmd_runner_cancellable",
+                "capturing the stderr of svn cmd '{args}'",
+            ),
+        ));
+        let stdout_future = StdoutFuture(runner_context.pool.run_async(
+            move || {
+                let mut out = String::new();
+                while let Ok(stdout_str) = stdout.recv() {
+                    out.push_str(stdout_str.as_str());
+                }
+                out
+            },
+            JobDesc::create(
+                "common_cmd_runner_cancellable",
+                "capturing the stdout of svn cmd '{args}'",
+            ),
+        ));
         Ok((stdout_future, stderr_future))
     }
 }
