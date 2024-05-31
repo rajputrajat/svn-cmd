@@ -25,9 +25,9 @@ use crate::{
     sub_commands::log::{RevCount, StartRev, XmlOut},
     types::ToCmdArgs,
 };
+use cmd_wrapper::RunnerContext;
 use log::trace;
 use rr_common_utils::Future;
-use simple_broadcaster::Canceller;
 use std::{result::Result, sync::Arc};
 
 /// Accessor to svn command functionality
@@ -77,13 +77,14 @@ impl SvnCmd {
         &self,
         target: &str,
         recursive: bool,
-        canceller: Canceller,
+        runner_context: &RunnerContext,
     ) -> Result<(Future<Result<SvnList, SvnError>>, StderrFuture), SvnError> {
         let mut args = vec!["list", "--xml", target];
         if recursive {
             args.push("--recursive");
         }
-        let (xml_text_future, err_text_future) = self.get_cmd_out_cancellable(&args, canceller)?;
+        let (xml_text_future, err_text_future) =
+            self.get_cmd_out_cancellable(&args, runner_context)?;
         Ok((
             xml_text_future
                 .0
@@ -111,9 +112,9 @@ impl SvnCmd {
     pub fn cat_cancellable(
         &self,
         target: &str,
-        canceller: Canceller,
+        runner_context: &RunnerContext,
     ) -> Result<(StdoutFuture, StderrFuture), SvnError> {
-        self.get_cmd_out_cancellable(&["cat", target], canceller)
+        self.get_cmd_out_cancellable(&["cat", target], runner_context)
     }
 
     /// SVN ADD command to add new files to stage for commit operation
@@ -226,14 +227,14 @@ impl SvnCmd {
     fn get_cmd_out_cancellable(
         &self,
         args: &[&str],
-        canceller: Canceller,
+        runner_context: &RunnerContext,
     ) -> Result<(StdoutFuture, StderrFuture), SvnError> {
         let mut all_args: Vec<&str> = Vec::new();
         all_args.extend_from_slice(args);
         self.extra_args
             .split_whitespace()
             .for_each(|s| all_args.push(s));
-        SvnWrapper::new().common_cmd_runner_cancellable(&all_args, canceller)
+        SvnWrapper::new().common_cmd_runner_cancellable(&all_args, runner_context)
     }
 
     fn log_fetcher(
