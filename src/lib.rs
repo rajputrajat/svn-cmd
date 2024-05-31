@@ -8,7 +8,7 @@ mod sub_commands;
 mod types;
 
 pub use crate::{
-    cmd_wrapper::{StderrFuture, StdoutFuture},
+    cmd_wrapper::{RunnerContext, StderrFuture, StdoutFuture},
     errors::SvnError,
     sub_commands::{
         info::{EntryCommit, SvnInfo},
@@ -25,7 +25,6 @@ use crate::{
     sub_commands::log::{RevCount, StartRev, XmlOut},
     types::ToCmdArgs,
 };
-use cmd_wrapper::RunnerContext;
 use log::trace;
 use rr_common_utils::Future;
 use std::{result::Result, sync::Arc};
