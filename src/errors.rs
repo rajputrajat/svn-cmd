@@ -38,6 +38,10 @@ pub enum SvnError {
     #[error(transparent)]
     ManagedCommandError(#[from] managed_command::Error),
 
+    /// errors from the crate 'oneshot'
+    #[error(transparent)]
+    OneshotRecvError(#[from] oneshot::RecvError),
+
     /// other error
     #[error("other error: `{0}`")]
     Other(String),
