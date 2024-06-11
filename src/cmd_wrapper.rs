@@ -19,10 +19,6 @@ impl SvnWrapper {
             cmd: "svn".to_owned(),
         }
     }
-
-    // pub(crate) fn from_cmd<T: Into<String>>(cmd: T) -> Self {
-    //     Self { cmd: cmd.into() }
-    // }
 }
 
 /// This wraps in rr_common_utils::Future<String> for stdout
