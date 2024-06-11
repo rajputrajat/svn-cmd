@@ -81,8 +81,8 @@ impl SvnWrapper {
                 out
             },
             JobDesc::create(
-                "common_cmd_runner_cancellable",
-                "capturing the stderr of svn cmd '{args}'",
+                "common_cmd_runner_cancellable".to_owned(),
+                format!("capturing the stderr of svn cmd '{args:?}'"),
             ),
         ));
         let stdout_future = StdoutFuture(ThreadPool::global().run_async(
@@ -94,8 +94,8 @@ impl SvnWrapper {
                 out
             },
             JobDesc::create(
-                "common_cmd_runner_cancellable",
-                "capturing the stdout of svn cmd '{args}'",
+                "common_cmd_runner_cancellable".to_owned(),
+                format!("capturing the stdout of svn cmd '{args:?}'"),
             ),
         ));
         Ok((stdout_future, stderr_future))
