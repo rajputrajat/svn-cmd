@@ -10,7 +10,7 @@ use std::{collections::vec_deque::Iter, collections::VecDeque, fmt::Display};
 #[derive(Deserialize, Debug, Clone, Default)]
 pub struct SvnList {
     /// the list
-    pub list: Entry,
+    pub list: Option<Entry>,
 }
 
 #[derive(Deserialize, Debug, Clone, Default)]
@@ -42,9 +42,6 @@ impl Display for ListEntry {
     }
 }
 
-/// if this returns `true` list recursively, otherwise skip
-//pub type ListFilter = dyn Fn(&str, ListEntry) -> Result<bool, SvnError>;
-
 impl SvnList {
     /// parse XML text
     pub(crate) fn parse(xml_text: &str) -> Result<Self, SvnError> {
@@ -55,10 +52,10 @@ impl SvnList {
     }
 
     /// returns iterator
-    pub fn iter(&self) -> ListInspector {
-        ListInspector {
-            iter: self.list.entry.iter(),
-        }
+    pub fn iter_opt(&self) -> Option<ListInspector> {
+        self.list.as_ref().map(|entries| ListInspector {
+            iter: entries.entry.iter(),
+        })
     }
 }
 
@@ -98,7 +95,9 @@ mod tests {
         for list_xml in [LIST_XML_1, LIST_XML_2, LIST_XML_3] {
             let list = SvnList::parse(list_xml).unwrap();
             (0..10).for_each(|_| {
-                println!("{:?}\n", list.iter().next());
+                if let Some(mut iter) = list.iter_opt() {
+                    println!("{:?}\n", iter.next());
+                }
             });
         }
     }
