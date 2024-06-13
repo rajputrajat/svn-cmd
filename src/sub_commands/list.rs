@@ -4,7 +4,12 @@ use crate::{
 };
 use log::error;
 use serde::Deserialize;
-use std::{collections::vec_deque::Iter, collections::VecDeque, fmt::Display};
+use std::{
+    collections::{vec_deque::Iter, HashMap, VecDeque},
+    fmt::Display,
+    mem,
+    ops::Deref,
+};
 
 /// svn list
 #[derive(Deserialize, Debug, Clone, Default)]
@@ -18,6 +23,12 @@ pub struct Entry {
     pub entry: Option<VecDeque<ListEntry>>,
 }
 
+/// on asking create a map from file/dir name to the list_entry
+pub struct SvnListMap {
+    svn_list: SvnList,
+    map: HashMap<String, usize>,
+}
+
 /// SvnList is madeup of these entries
 #[derive(Deserialize, PartialEq, Clone, Debug)]
 pub struct ListEntry {
@@ -25,7 +36,7 @@ pub struct ListEntry {
     /// is file or dir
     pub kind: PathType,
     /// relative path name
-    pub name: String,
+    pub name: Option<String>,
     /// file size
     pub size: Option<usize>,
     /// commit structure
@@ -36,7 +47,7 @@ impl Display for ListEntry {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
-            "kind: {:?}, name: {}, size: {:?}, commit: {:?}",
+            "kind: {:?}, name: {:?}, size: {:?}, commit: {:?}",
             self.kind, self.name, self.size, self.commit
         )
     }
@@ -56,6 +67,38 @@ impl SvnList {
         self.list.entry.as_ref().map(|entries| ListInspector {
             iter: entries.iter(),
         })
+    }
+
+    /// return SvnListMap
+    pub fn into_list_map(mut self) -> SvnListMap {
+        let map = self
+            .list
+            .entry
+            .as_mut()
+            .map(|entries| {
+                entries
+                    .iter_mut()
+                    .enumerate()
+                    .map(|(i, entry)| {
+                        let mut name = entry.name.take().unwrap();
+                        let name = &mut name; // name will be present as parsed from the svn list xml out
+                        (mem::take(name), i)
+                    })
+                    .collect()
+            })
+            .unwrap_or(HashMap::new());
+        SvnListMap {
+            svn_list: self,
+            map,
+        }
+    }
+}
+
+impl Deref for SvnListMap {
+    type Target = HashMap<String, usize>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.map
     }
 }
 
