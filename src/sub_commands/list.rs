@@ -24,6 +24,7 @@ pub struct Entry {
 }
 
 /// on asking create a map from file/dir name to the list_entry
+#[derive(Deserialize, Debug, Clone, Default)]
 pub struct SvnListMap {
     svn_list: SvnList,
     map: HashMap<String, usize>,
