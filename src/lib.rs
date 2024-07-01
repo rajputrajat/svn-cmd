@@ -14,6 +14,7 @@ pub use crate::{
         info::{EntryCommit, SvnInfo},
         list::{ListEntry, SvnList, SvnListMap},
         log::SvnLog,
+        prop_list::SvnProplist,
         status::SvnStatus,
         version::CmdVersion,
     },
@@ -161,6 +162,11 @@ impl SvnCmd {
     pub fn info(&self, target: &str) -> Result<SvnInfo, SvnError> {
         let out = self.get_cmd_out(&["info", "--xml", target])?;
         SvnInfo::parse(&out)
+    }
+
+    /// svn proplist <path>
+    pub fn prop_list(&self, target: &str) -> Result<SvnProplist, SvnError> {
+        todo!()
     }
 
     /// SVN DELETE command: delete file/dir from remote url

@@ -24,6 +24,7 @@ oneshot = "*"
 [dev-dependencies]
 env_logger = "^0.8"
 bugsalot = "0.2"
+anyhow = "1.0.86"
 
 [[example]]
 name = "xml_parsing"
