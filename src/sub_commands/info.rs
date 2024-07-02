@@ -32,7 +32,7 @@ pub struct InfoEntry {
     pub url: String,
     #[serde(rename(deserialize = "relative-url"))]
     pub relative_url: String,
-    repository: EntryRepository,
+    pub repository: EntryRepository,
     pub commit: EntryCommit,
 }
 
