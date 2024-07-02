@@ -1,3 +1,4 @@
+use super::prop_get::{deserialize_property_name, PropertyName};
 use crate::SvnError;
 use log::error;
 use serde::Deserialize;
@@ -19,7 +20,8 @@ pub struct Target {
 #[derive(Debug, Deserialize, Clone, PartialEq)]
 pub struct Property {
     /// name of the property
-    pub name: String,
+    #[serde(deserialize_with = "deserialize_property_name")]
+    pub name: PropertyName,
 }
 
 impl SvnProplist {
@@ -51,5 +53,9 @@ mod tests {
         <property   name="svn:externals"/>
         </target>
         </properties>
+    "##;
+
+    const _PROP_LIST_ERROR: &str = r##"
+        <?xml version="1.0" encoding="UTF-8"?><properties>svn: E170013: Unable to connect to a repository at URL 'https://svn.ali.global/GDK_games/GDK_games/BLS/Class_II/FuDaiLianLian_Boost/MarsPortrait/Peacock/tags/gampro_usa_1.01_68099_RC05_PC01_Signed/source/liv'svn: E731001: No such host is known.
     "##;
 }

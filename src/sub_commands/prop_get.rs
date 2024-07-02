@@ -49,7 +49,7 @@ pub struct ExternalPath {
     pub relative_path: String,
 }
 
-fn deserialize_property_name<'de, D>(deserializer: D) -> Result<PropertyName, D::Error>
+pub(crate) fn deserialize_property_name<'de, D>(deserializer: D) -> Result<PropertyName, D::Error>
 where
     D: Deserializer<'de>,
 {
