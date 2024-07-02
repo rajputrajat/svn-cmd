@@ -20,6 +20,7 @@ simple-broadcaster = { git = "https://github.com/rajputrajat/simple-broadcaster"
 managed-command = { git = "https://github.com/rajputrajat/managed-command" }
 rr-common-utils = { git = "https://github.com/rajputrajat/rr-common-utils" }
 oneshot = "*"
+itertools = "0.13.0"
 
 [dev-dependencies]
 env_logger = "^0.8"
