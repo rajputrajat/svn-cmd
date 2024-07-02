@@ -43,6 +43,15 @@ pub enum PropertyName {
     Other(String),
 }
 
+impl PropertyName {
+    pub(crate) fn as_str(&self) -> &str {
+        match self {
+            Self::SvnExternals => "svn:externals",
+            Self::Other(other) => other,
+        }
+    }
+}
+
 #[derive(Debug, Deserialize, Clone, PartialEq)]
 pub struct ExternalPath {
     pub name: String,
