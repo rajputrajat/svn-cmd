@@ -1,6 +1,6 @@
 //! Errors are defined here
 
-use std::{io, string::FromUtf8Error};
+use std::io;
 use thiserror::Error;
 
 /// lib specific error type
@@ -15,8 +15,8 @@ pub enum SvnError {
     MissingSvnCli(#[from] io::Error),
 
     /// invalid UTF8 output
-    #[error(transparent)]
-    FromUtf8Error(#[from] FromUtf8Error),
+    #[error("utf8 error. lossy string is passed in")]
+    FromUtf8Error(String),
 
     /// invalid UTF8 output
     #[error(transparent)]

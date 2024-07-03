@@ -44,7 +44,7 @@ impl SvnWrapper {
                 if o.stderr.is_empty() {
                     String::from_utf8(o.stdout).map_err(|e| {
                         trace!("invalid utf8 output of svn cmd '{:?} {args:?}'", self.cmd,);
-                        SvnError::FromUtf8Error(e)
+                        SvnError::FromUtf8Error(String::from_utf8_lossy(e.as_bytes()).into_owned())
                     })
                 } else {
                     Err(SvnError::Other(format!(
