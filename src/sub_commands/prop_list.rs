@@ -6,7 +6,7 @@ use serde::Deserialize;
 #[derive(Debug, Deserialize, Clone, PartialEq)]
 pub struct SvnProplist {
     /// target
-    pub target: Target,
+    pub target: Option<Target>,
 }
 
 #[derive(Debug, Deserialize, Clone, PartialEq)]
