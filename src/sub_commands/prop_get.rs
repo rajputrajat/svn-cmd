@@ -76,7 +76,7 @@ where
     let s: String = Deserialize::deserialize(deserializer)?;
     Ok(s.split_whitespace()
         .tuples()
-        .map(|(name, relative_path)| ExternalPath {
+        .map(|(relative_path, name)| ExternalPath {
             name: name.to_owned(),
             relative_path: relative_path.to_owned(),
         })
